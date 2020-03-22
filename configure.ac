@@ -3,7 +3,7 @@ AC_INIT([template-autoc], [1.0], [chia_jason96@live.com])
 
 # initialize automake, report warnings as errors
 # foreign keyword here specify that this package is a foreign package
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 
 # initialize libtool (for shared library)
 AM_PROG_AR

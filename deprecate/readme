@@ -1,0 +1,9 @@
+Made to test out BLS IBI using type 3 pairings on pbc
+please ensure pbc libraries are installed:
+https://crypto.stanford.edu/pbc/
+
+TODO: the newline after id string is sent, and considered as part of a signature?
+TODO: identical cmt, cha rsp, but can't validate ?
+
+ToraNova 2019
+chia_jason96@live.com

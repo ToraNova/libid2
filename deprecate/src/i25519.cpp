@@ -3,15 +3,11 @@
  * uses NaCl
  * https://nacl.cr.yp.to/install.html
  * Toranova2019
- *
- * Contains implementation of TNC signature scheme
- * and TNC IBI
- * abbreviated as tsi25519 - TNC signature and identification using 25519
 */
 
 // declaration includes
-#include "tsi25519.hpp"
-#include "debug.h"
+#include "i25519.hpp"
+#include "ptdebug.h"
 
 //mini socket library
 #include "simplesock.h"
@@ -39,14 +35,7 @@ using namespace std;
 #define ELE crypto_core_ristretto255_BYTES
 #define SCA crypto_core_ristretto255_SCALARBYTES
 
-/*
- * Key storage detail (as of 2020 Mar 22)
- *
- * skey - < 256 a >< 256 B >< 256 P1 >< 256 P2 > (msk)
- * pkey - < 256 B >< 256 P1 >< 256 P2 > (mpk)
- *
- */
-namespace tsi25519
+namespace c25519
 {
 	//standard signatures
 	namespace ss{
@@ -56,13 +45,19 @@ namespace tsi25519
 		unsigned char **sbuffer, size_t *slen
 	){
 		int rc;
-		//pbufer stores B, P1 and P2 (MAIN PUBLIC KEY)
+		//plen stores B, P1 and P2
 		*plen = 3*ELE;
 		*pbuffer = (unsigned char *)malloc( *(plen) );
-		//sbuffer stores a, B, P1 and P2 (SECRET KEY, also contains PUBLIC COMPONENTS)
-		//a is the main secret
+		//stores a, B, P1 and P2
 		*slen = SCA+(*plen);
 		*sbuffer = (unsigned char *)malloc( *(slen) );
+
+#ifdef EVERB
+		//debugging lines
+		clock_t start, end;
+		double cpu_time_used;
+		start = clock();
+#endif
 
 		//sample generator
 		//generate random 32bit scalar Zq
@@ -101,26 +96,49 @@ namespace tsi25519
 			ELE
 			); //copy P2 into sbuffer
 
-#ifdef DEBUG
+		/*
+#ifdef EDEBUG
 		size_t i;
-		printf("a  :");
+		debug("a");
 		for(i=0;i<SCA;i++){
 			printf("%02X",(*sbuffer)[i]);
 		}
-		printf("\nB  :");
+		printf("\n");
+
+		debug("B,P1,P2 (secret,public)");
 		for(i=0;i<ELE;i++){
 			printf("%02X",(*sbuffer+SCA)[i]);
 		}
-		printf("\nP1 :");
+		printf("\n");
+		for(i=0;i<ELE;i++){
+			printf("%02X",(*pbuffer)[i]);
+		}
+		printf("\n");
 		for(i=0;i<ELE;i++){
 			printf("%02X",(*sbuffer+SCA+ELE)[i]);
 		}
-		printf("\nP2 :");
+		printf("\n");
+		for(i=0;i<ELE;i++){
+			printf("%02X",(*pbuffer+ELE)[i]);
+		}
+		printf("\n");
 		for(i=0;i<ELE;i++){
 			printf("%02X",(*sbuffer+SCA+2*ELE)[i]);
 		}
 		printf("\n");
+		for(i=0;i<ELE;i++){
+			printf("%02X",(*pbuffer+2*ELE)[i]);
+		}
+		printf("\n");
 #endif
+		*/
+
+#ifdef EVERB
+		end = clock();
+		cpu_time_used = ((((double) (end - start)) / CLOCKS_PER_SEC) * 1000); //millis
+#endif
+		verbose("t: %f ms", cpu_time_used );
+
 		return 0;
 	}
 
@@ -137,6 +155,13 @@ namespace tsi25519
 
 		*olen = 2*SCA+3*ELE; //s, x and U' V'
 		*obuffer = (unsigned char *)calloc( *(olen), sizeof(unsigned char) );
+
+#ifdef EVERB
+		//debugging lines
+		clock_t start, end;
+		double cpu_time_used;
+		start = clock();
+#endif
 
 		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
 		crypto_core_ristretto255_scalar_random(r);
@@ -167,6 +192,11 @@ namespace tsi25519
 		crypto_core_ristretto255_scalar_mul( tmp , (*obuffer+SCA), sbuffer ); //
 		crypto_core_ristretto255_scalar_add( *obuffer, tmp, r ); // s = r + xa
 		//s is on first 32byte on obuffer
+#ifdef EVERB
+		end = clock();
+		cpu_time_used = ((((double) (end - start)) / CLOCKS_PER_SEC) * 1000); //millis
+#endif
+		verbose("t: %f ms", cpu_time_used );
 		return 0;
 	}
 
@@ -233,44 +263,51 @@ namespace tsi25519
 		//check if tmp is equal to x from obuffer
 		rc = crypto_verify_32( tmp, (obuffer+SCA) );
 
-#ifdef DEBUG
+#ifdef EDEBUG
 		size_t j;
 		printf("B :");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(pbuffer)[j]);
 		}
-		printf("\nP1:");
+		printf("\n");
+		printf("P1:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(pbuffer+ELE)[j]);
 		}
-		printf("\nU :");
+		printf("\n");
+		printf("U :");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(obuffer+2*SCA)[j]);
 		}
-		printf("\nU':");
+		printf("\n");
+		printf("U':");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(tmp3)[j]);
 		}
-		printf("\nV :");
+		printf("\n");
+		printf("V :");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(obuffer+2*SCA+ELE)[j]);
 		}
-		printf("\nV':");
+		printf("\n");
+		printf("V':");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(tmp4)[j]);
 		}
-		printf("\nx :");
+		printf("\n");
+		printf("s :");
+		for(j=0;j<SCA;j++){
+			printf("%02X",(obuffer)[j]);
+		}
+		printf("\n");
+		printf("x :");
 		for(j=0;j<SCA;j++){
 			printf("%02X",(obuffer+SCA)[j]);
 		}
-		printf("\nx':");
+		printf("\n");
+		printf("x':");
 		for(j=0;j<SCA;j++){
 			printf("%02X",(tmp)[j]);
-		}
-		printf("\n");
-		printf("signature :");
-		for(j=0;j<SCA;j++){
-			printf("%02X",(obuffer)[j]);
 		}
 		printf("\n");
 #endif
@@ -317,21 +354,28 @@ namespace tsi25519
 
 		//Create socket
 		tsock = sockgen(0);
-		if(tsock == -1){lerror("Socket creation failed\n");return 1;}
+		if(tsock == -1){log_err("Socket creation failed");return 1;}
 
 		//Attempt to connect
-		debug("Attempting to connect to %s:%d\n",srv,port);
-		if( sockconn(tsock, srv, port) < 0){lerror("Failed to connect to verifier\n");return 1;}
-		debug("Connection established with %s:%d\n",srv,port);
-		debug("Sending ID string %s\n",mbuffer);
+		verbose("Attempting to connect to %s:%d",srv,port);
+		if( sockconn(tsock, srv, port) < 0){log_err("Failed to connect to verifier");return 1;}
+		verbose("Connection established with %s:%d",srv,port);
+		verbose("Sending ID string %s",mbuffer);
 		sendbuf(tsock, (char *)mbuffer , mlen, timeout);
 		//await byte 0x5a before proceeding with protocol
 		if( recv(tsock, buf, 1, 0) < 0 || buf[0] != 0x5a){
-			lerror("Failed to recv go-ahead (0x5a) byte\n");
+			log_err("Failed to recv go-ahead (0x5a) byte");
 			return 1;
 		}
-		debug("Go-Ahead received (0x5a), Starting PROVE protocol");
+		verbose("Go-Ahead received (0x5a), Starting PROVE protocol");
 		memset(buf, 0, CONN_MAXBF_SIZE); //reset
+
+#ifdef EVERB
+		//debugging lines
+		clock_t start, end;
+		double cpu_time_used;
+		start = clock();
+#endif
 
 		//sample t (commit secret)
 		crypto_core_ristretto255_scalar_random(t);
@@ -344,21 +388,24 @@ namespace tsi25519
 		rc = crypto_scalarmult_ristretto255( buf+2*ELE, t, obuffer+2*SCA+2*ELE);
 		if( rc != 0 ) return rc; //abort if fail
 
-#ifdef DEBUG
+#ifdef EDEBUG
 		size_t j;
-		printf("U  :");
+		printf("U:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",buf[j]);
 		}
-		printf("\nV  :");
+		printf("\n");
+		printf("V:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(buf+ELE)[j]);
 		}
-		printf("\nT  :");
+		printf("\n");
+		printf("T:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(buf+2*ELE)[j]);
 		}
-		printf("\nB  :");
+		printf("\n");
+		printf("B:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(obuffer+2*SCA+2*ELE)[j]);
 		}
@@ -372,7 +419,7 @@ namespace tsi25519
 		rc = 1;
 		rc = recvbuf(tsock, (char *)c, SCA, 0);
 		if( rc < 0 ){
-			lerror("Failed to recv CHALLENGE from verifier\n");
+			log_err("Failed to recv CHALLENGE from verifier");
 			return 1;
 		}
 
@@ -381,16 +428,22 @@ namespace tsi25519
 		crypto_core_ristretto255_scalar_add( y, tmp, t ); // y = t + cs
 		sendbuf(tsock, (char *)y , SCA, timeout);
 
-#ifdef DEBUG
-		printf("c  :");
-		for(j=0;j<SCA;j++){
-			printf("%02X",(c)[j]);
-		}
-		printf("\ny  :");
+#ifdef EDEBUG
+		printf("y:");
 		for(j=0;j<SCA;j++){
 			printf("%02X",(y)[j]);
 		}
-		printf("\ns  :");
+		printf("\n");
+		printf("c:");
+		for(j=0;j<SCA;j++){
+			printf("%02X",(c)[j]);
+		}
+		printf("\n");
+		for(j=0;j<mlen;j++){
+			printf("%02X",(mbuffer)[j]);
+		}
+		printf("\n");
+		printf("s:");
 		for(j=0;j<SCA;j++){
 			printf("%02X",(obuffer)[j]);
 		}
@@ -400,12 +453,17 @@ namespace tsi25519
 		buf[0] = 0x01;
 		rc = recv(tsock, buf, 1, 0); //receive final result
 		if( rc < 0 ){
-			lerror("Failed to recv RESULT from verifier\n");
+			log_err("Failed to recv RESULT from verifier");
 			return 1;
 		}
 		//close socket
 		close(tsock);
 		debug("Received: %02X",buf[0]);
+#ifdef EVERB
+		end = clock();
+		cpu_time_used = ((((double) (end - start)) / CLOCKS_PER_SEC) * 1000); //millis
+#endif
+		verbose("t: %f ms", cpu_time_used );
 
 		//return OK
 		return (int) buf[0];
@@ -431,50 +489,58 @@ namespace tsi25519
 
 		//Create socket
 		ssock = sockgen(0);
-		if(ssock == -1){lerror("Socket creation failed\n");return 1;}
+		if(ssock == -1){log_err("Socket creation failed");return 1;}
 		//bind the socket
-		if(sockbind(ssock,port, 1) < 0){lerror("Port bind failed\n");return 1;}
+		if(sockbind(ssock,port, 1) < 0){log_err("Port bind failed");return 1;}
 
 		//listen for incoming conn
-		debug("Listening for verification attempts on port %d",port);
+		verbose("Listening for verification attempts on port %d",port);
 		listen(ssock, 1);
 
 		csock = accept( ssock, (struct sockaddr *)&cli, (socklen_t*)&cli_len);
-		if(csock < 0){lerror("Connection failed to establish\n");return 1;}
-		debug("Connection established");
+		if(csock < 0){log_err("Connection failed to establish");return 1;}
+		verbose("Connection established");
 		rc = recv(csock, buf, CONN_MAXBF_SIZE, 0);
 		if( rc < 0 ){
-			lerror("Failed to recv ID string from prover\n");
+			log_err("Failed to recv ID string from prover");
 			return 1;
 		}
 		*mlen = (size_t)rc;
 		*mbuffer = (unsigned char *)malloc(*mlen);
 		memcpy( *mbuffer, buf, *mlen );
-		debug("ID string %s (%lu)",*mbuffer,*mlen);
+		verbose("ID string %s (%lu)",*mbuffer,*mlen);
 		//echo back ox5a to begin protocol
-		if( send(csock, ackp, 1, 0) < 0){lerror("Failed to echo back go-ahead (0x5a)\n");}
-		debug("Go-Ahead sent (0x5a), Starting VERIFY protocol");
+		if( send(csock, ackp, 1, 0) < 0){log_err("Failed to echo back go-ahead (0x5a)");}
+		verbose("Go-Ahead sent (0x5a), Starting VERIFY protocol");
 		memset(buf, 0, CONN_MAXBF_SIZE);
 
+#ifdef EVERB
+		//debugging lines
+		clock_t start, end;
+		double cpu_time_used;
+		start = clock();
+#endif
 
 		rc = recvbuf(csock, (char *)buf, 3*ELE, 0);
 		if( rc < 0 ){
-			lerror("Failed to recv COMMIT from prover\n");
+			log_err("Failed to recv COMMIT from prover");
 			return 1;
 		}
-		debug("Commit Received");
+		verbose("Commit Received");
 
-#ifdef DEBUG
+#ifdef EDEBUG
 		size_t j;
-		printf("U  :");
+		printf("U:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",buf[j]);
 		}
-		printf("\nV  :");
+		printf("\n");
+		printf("V:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(buf+ELE)[j]);
 		}
-		printf("\nT  :");
+		printf("\n");
+		printf("T:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(buf+2*ELE)[j]);
 		}
@@ -488,11 +554,11 @@ namespace tsi25519
 		memset(y, 0, SCA);
 		rc = recvbuf(csock, (char *)y, SCA, 0);
 		if( rc < 0 ){
-			lerror("Failed to recv RESPONSE from prover\n");
+			log_err("Failed to recv RESPONSE from prover");
 			return 1;
 		}
 
-		debug("Received Response...Computing Validity\n");
+		verbose("Received Response...Computing Validity");
 
 		//compute hash
 		crypto_hash_sha512_init( &eh_state );
@@ -503,23 +569,27 @@ namespace tsi25519
 		crypto_core_ristretto255_scalar_reduce( x, (const unsigned char *)hshe );
 
 #ifdef EDEBUG
-		printf("c  :");
+		printf("c:");
 		for(j=0;j<SCA;j++){
 			printf("%02X",(c)[j]);
 		}
-		printf("\ny  :");
+		printf("\n");
+		printf("y:");
 		for(j=0;j<SCA;j++){
 			printf("%02X",(y)[j]);
 		}
-		printf("\nx  :");
+		printf("\n");
+		printf("x:");
 		for(j=0;j<SCA;j++){
 			printf("%02X",(x)[j]);
 		}
-		printf("\nB  :");
+		printf("\n");
+		printf("B_:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(pbuffer)[j]);
 		}
-		printf("\nP1  :");
+		printf("\n");
+		printf("P1:");
 		for(j=0;j<ELE;j++){
 			printf("%02X",(pbuffer+ELE)[j]);
 		}
@@ -547,7 +617,13 @@ namespace tsi25519
 		}
 		sendbuf(csock, (char *)buf , 1, timeout); //send back the results
 
-		debug("Replied: %02X\n",buf[0]);
+#ifdef EVERB
+		end = clock();
+		cpu_time_used = ((((double) (end - start)) / CLOCKS_PER_SEC) * 1000); //millis
+#endif
+		verbose("t: %f ms", cpu_time_used );
+
+		debug("Replied: %02X",buf[0]);
 
 		close(csock);
 		close(ssock);

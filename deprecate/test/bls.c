@@ -1,27 +1,28 @@
 /*
- * TNC signature test
-  Final Year Project scheme
+  BLS signature scheme test driver file
   ToraNova 2019
   chia_jason96@live.com
 */
 #include "id2.h"
+#include <cstdlib>
 
-#include <time.h>
-#include <stdlib.h>
-#define PORT 8051
+#define str_paramfile 	"params/d359.param"
 
-#define str_publicfile 	"res/c25519/public"
-#define str_secretfile 	"res/c25519/secret"
-#define str_messagefile "res/c25519/id"
-#define str_signfile 	"res/c25519/usk"
+#define str_publicfile 	"res/bls/public"
+#define str_secretfile 	"res/bls/secret"
+#define str_messagefile "res/bls/message"
+#define str_signfile 	"res/bls/signature"
 
 int main(int argc, char *argv[]){
-	int rc;
 
 	if(argc > 1){
 		//read param file and verify
+		FILE *paramfile = fopen( str_paramfile, "r");
 		FILE *publicfile, *secretfile;
 		FILE *messagefile, *signfile;
+		char param[PARAM_BUF_SZ];
+		size_t count = fread(param, 1, PARAM_BUF_SZ, paramfile);
+		log_info("Reading params from %s",str_paramfile);
 
 		if( strcmp(argv[1], "gen") == 0 ){
 			publicfile = fopen( str_publicfile, "w");
@@ -30,14 +31,8 @@ int main(int argc, char *argv[]){
 			unsigned char *pbuf, *sbuf;
 			size_t plen, slen;
 
-			rc = ts25519_keygen( &pbuf, &plen, &sbuf, &slen);
-			if(rc != 0)lerror("Keygen Error\n");
+			bls_ss_keygen( param, count, &pbuf, &plen, &sbuf, &slen);
 
-			//output as asn1 der PEM
-			//e25519_asn1_der_out( publicfile, pbuf, plen, TYPE_PUBLIC);
-			//e25519_asn1_der_out( secretfile, sbuf, slen, TYPE_SECRET);
-
-			//output raw base64
 			write_b64( publicfile, pbuf, plen );
 			write_b64( secretfile, sbuf, slen );
 
@@ -48,30 +43,28 @@ int main(int argc, char *argv[]){
 			free(sbuf);
 
 		}else if( strcmp(argv[1],"sign") == 0 ){
-
+			publicfile = fopen( str_publicfile, "r");
 			secretfile = fopen( str_secretfile, "r");
 			messagefile =  fopen( str_messagefile, "r");
 			signfile = fopen( str_signfile, "w");
 
-			unsigned char *sbuf, *obuf, *mbuf;
-			size_t slen, mlen, olen;
+			unsigned char *pbuf, *sbuf, *obuf, *mbuf;
+			size_t plen, slen, mlen, olen;
 
-			//read as asn1 der PEM
-			//sbuf = e25519_asn1_der_in( secretfile, &slen, TYPE_SECRET );
-
-			//raw base64
+			pbuf = read_b64( publicfile, &plen );
 			sbuf = read_b64( secretfile, &slen );
 			mbuf = (unsigned char *)fileread( messagefile, &mlen );
 
-			rc = ts25519_sign(sbuf, slen, mbuf, mlen, &obuf, &olen);
-			if(rc != 0)lerror("Sign Error\n");
+			bls_ss_sign( param, count, pbuf, plen, sbuf, slen, mbuf, mlen, &obuf, &olen);
 
 			write_b64( signfile, obuf, olen );
 
+			fclose(publicfile);
 			fclose(secretfile);
 			fclose(messagefile);
 			fclose(signfile);
 
+			free(pbuf);
 			free(sbuf);
 			free(mbuf);
 			free(obuf);
@@ -84,19 +77,15 @@ int main(int argc, char *argv[]){
 			unsigned char *pbuf, *obuf, *mbuf;
 			size_t plen, mlen, olen;
 
-			//read as asn1 DER PEM
-			//pbuf = e25519_asn1_der_in( publicfile, &plen, TYPE_PUBLIC );
-
-			//raw base64
 			pbuf = read_b64( publicfile, &plen );
 			obuf = read_b64( signfile, &olen );
 			mbuf = (unsigned char *)fileread( messagefile, &mlen );
 
-			rc = ts25519_verify( pbuf, plen, mbuf, mlen, obuf, olen);
+			int rc = bls_ss_verify( param, count, pbuf, plen, mbuf, mlen, obuf, olen);
 			if(rc==0){
-				printf("signature valid\n");
+				log_info("signature valid");
 			}else{
-				printf("signature invalid\n");
+				log_info("signature invalid");
 			}
 
 			fclose(publicfile);
@@ -106,14 +95,16 @@ int main(int argc, char *argv[]){
 			free(pbuf);
 			free(obuf);
 			free(mbuf);
+
 		}else{
 			//echo an error
-			lerror("Invalid mode %s, please specify either <gen|sign|verify> !\n", argv[1]);
+			log_err("Invalid mode %s, please specify either <gen|sign|verify> !", argv[1]);
 		}
 
+		fclose(paramfile);
 	}else{
 		//echo an error
-		lerror("Please specify mode <gen|sign|verify> !\n");
+		log_err("Please specify mode <gen|sign|verify> !");
 	}
 
 	return 0;

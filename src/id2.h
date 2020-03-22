@@ -26,7 +26,7 @@
 #include "tsi25519.h"
 
 //auxiliary helpers
-#include "futil.h"
-#include "asn1util.h"
-#include "jbase64.h"
-#include "debug.h"
+#include "utils/debug.h"
+#include "utils/jbase64.h"
+#include "utils/futil.h"
+#include "utils/asn1util.h"

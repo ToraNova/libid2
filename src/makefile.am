@@ -2,7 +2,9 @@
 # using libtool (different library name to avoid confusion)
 # if this is used, the SHARED library file is also compiled
 lib_LTLIBRARIES = libid2.la
-libid2_la_SOURCES = tsi25519.cpp tsi25519.c.cpp simplesock.c jbase64.c asn1util.c futil.c
+libid2_la_SOURCES = ts25519.cpp ti25519.cpp tsi25519.c.cpp \
+		    ti25519_client.cpp ti25519_server.cpp \
+		    utils/simplesock.c utils/jbase64.c utils/asn1util.c utils/futil.c
 libid2_la_LDFLAGS = -lsodium
 
 # header files to be installed; $(includedir) @default /usr/local/include
@@ -10,7 +12,7 @@ include_HEADERS = id2.h
 
 # define programs to be compiled and installed; $(bindir) @default /usr/local/bin
 noinst_PROGRAMS = i25519 s25519
-i25519_SOURCES = i25519.c
-s25519_SOURCES = s25519.c
+i25519_SOURCES = tests/i25519.c
+s25519_SOURCES = tests/s25519.c
 i25519_LDADD = libid2.la
 s25519_LDADD = libid2.la

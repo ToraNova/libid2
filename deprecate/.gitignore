@@ -1,0 +1,5 @@
+libid2.so
+bin/*
+!bin/.gitkeep
+obj/*
+!obj/.gitkeep

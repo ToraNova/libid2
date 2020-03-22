@@ -31,6 +31,7 @@ unsigned char *read_b64(FILE *stream, size_t *length){
 
 //writes the char to a file as base64 encoding
 void write_b64(FILE *stream, const unsigned char *target, size_t length){
+	if( stream == NULL ){lerror("Stream error: NULL reference\n"); return;} //unable to open stream
 	char *enc;
 	enc = b64_encode( target, length, BASE64_DEFAULT_WRAP);
 	//enc = b64_encode( target, length, 0); //no wrapping
@@ -41,6 +42,7 @@ void write_b64(FILE *stream, const unsigned char *target, size_t length){
 
 //read a file completely
 char *fileread(FILE *stream, size_t *length){
+	if( stream == NULL ){lerror("Stream error: NULL reference\n"); return NULL;} //unable to open stream
 	char *out;
 	//obtain message size
 	fseek(stream, 0, SEEK_END);

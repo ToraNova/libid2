@@ -1,0 +1,35 @@
+[VERBOSE] (test/schnorr.c:main:L803) running kh-schnorr-ibi
+DEBUG test/schnorr.c:schnorr:L57: setup t: 0.020760 ms
+DEBUG test/schnorr.c:schnorr:L103: extract t: 0.034940 ms
+DEBUG test/schnorr.c:schnorr:L154: ident t: 0.266030 ms
+1E0FEB94BBA99160456483A85343F16CD96541C9B12DBC8A8ED99F1337F2313E
+1E0FEB94BBA99160456483A85343F16CD96541C9B12DBC8A8ED99F1337F2313E
+[INFO] (test/schnorr.c:main:L808) +
+[VERBOSE] (test/schnorr.c:main:L810) running tight-schnorr-ibi
+DEBUG test/schnorr.c:tight:L194: setup t: 0.089050 ms
+DEBUG test/schnorr.c:tight:L240: extract t: 0.090340 ms
+DEBUG test/schnorr.c:tight:L292: ident t: 0.388260 ms
+98003BB3F24B8017A3694853AB6ACC449C3299768000BEFB99CD767C01F4C968
+98003BB3F24B8017A3694853AB6ACC449C3299768000BEFB99CD767C01F4C968
+[INFO] (test/schnorr.c:main:L815) +
+[VERBOSE] (test/schnorr.c:main:L818) running twin-schnorr-ibi
+DEBUG test/schnorr.c:twin:L338: setup t: 0.104450 ms
+DEBUG test/schnorr.c:twin:L392: extract t: 0.105190 ms
+DEBUG test/schnorr.c:twin:L456: ident t: 0.312750 ms
+7CE136A6A545725645B7C1E7AEE2BE2465A70F82651499067789C3DFCB286259
+7CE136A6A545725645B7C1E7AEE2BE2465A70F82651499067789C3DFCB286259
+[INFO] (test/schnorr.c:main:L823) +
+[VERBOSE] (test/schnorr.c:main:L826) running reset-schnorr-ibi
+DEBUG test/schnorr.c:reset:L496: setup t: 0.042950 ms
+DEBUG test/schnorr.c:reset:L540: extract t: 0.034770 ms
+DEBUG test/schnorr.c:reset:L609: ident t: 0.366390 ms
+760256F4ADAE3E2DE4AEE0C086F053C1BC9B3D347ADB1FAE4A0C268D090CBD10
+760256F4ADAE3E2DE4AEE0C086F053C1BC9B3D347ADB1FAE4A0C268D090CBD10
+[INFO] (test/schnorr.c:main:L831) +
+[VERBOSE] (test/schnorr.c:main:L834) running reset-twin-schnorr-ibi
+DEBUG test/schnorr.c:reset2:L659: setup t: 0.125730 ms
+DEBUG test/schnorr.c:reset2:L713: extract t: 0.105020 ms
+DEBUG test/schnorr.c:reset2:L792: ident t: 0.512630 ms
+428F6667A9BB833DB6F7C91ACF3317CBD729E1FBE8BB4CFF4FCCEA253D0CE23B
+428F6667A9BB833DB6F7C91ACF3317CBD729E1FBE8BB4CFF4FCCEA253D0CE23B
+[INFO] (test/schnorr.c:main:L839) +

@@ -2,18 +2,18 @@
  * Final Year Project scheme
  * ToraNova 2019
  * chia_jason96@live.com
- * 25519 based Identity based identification scheme
+ * EdDSA Identity based identification scheme
 */
 #include "id2.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <time.h>
 #define PORT 8051
 
 #define str_publicfile 	"res/c25519/public"
 #define str_secretfile 	"res/c25519/secret"
 #define str_idfile 	"res/c25519/id"
-#define str_uskfile 	"res/c25519/usk"
+#define str_uskfile 	"res/c25519/signature"
 
 int main(int argc, char *argv[]){
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 			unsigned char *pbuf, *sbuf;
 			size_t plen, slen;
 
-			ti25519_setup( &pbuf, &plen, &sbuf, &slen);
+			i25519_setup( &pbuf, &plen, &sbuf, &slen);
 
 			write_b64( publicfile, pbuf, plen );
 			write_b64( secretfile, sbuf, slen );
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
 			sbuf = read_b64( secretfile, &slen );
 			mbuf = (unsigned char *)fileread( idfile, &mlen );
 
-			ti25519_extract( sbuf, slen, mbuf, mlen, &obuf, &olen);
+			i25519_extract( sbuf, slen, mbuf, mlen, &obuf, &olen);
 			write_b64( uskfile, obuf, olen );
 
 			fclose(secretfile);
@@ -72,11 +72,11 @@ int main(int argc, char *argv[]){
 			obuf = read_b64( uskfile, &olen );
 			mbuf = (unsigned char *) fileread( idfile, &mlen );
 
-			int rc = ti25519_verifytest( pbuf, plen, mbuf, mlen, obuf, olen);
+			int rc = i25519_verifytest( pbuf, plen, mbuf, mlen, obuf, olen);
 			if(rc==0){
-				printf("identification success\n");
+				log_info("identification success");
 			}else{
-				printf("identification fail\n");
+				log_info("identification fail");
 			}
 
 			fclose(publicfile);
@@ -98,14 +98,14 @@ int main(int argc, char *argv[]){
 			mbuf = (unsigned char *) fileread( idfile, &mlen );
 
 			if( argc > 2 ){
-				rc = ti25519_prove( mbuf, mlen, obuf, olen, PORT, argv[2],10);
+				rc = i25519_prove( mbuf, mlen, obuf, olen, PORT, argv[2],10);
 			}else{
-				rc = ti25519_prove( mbuf, mlen, obuf, olen, PORT, "127.0.0.1",10);
+				rc = i25519_prove( mbuf, mlen, obuf, olen, PORT, "127.0.0.1",10);
 			}
 			if(rc==0){
-				printf("prove success\n");
+				log_info("prove success");
 			}else{
-				printf("prove fail\n");
+				log_info("prove fail");
 			}
 
 			fclose(idfile);
@@ -119,12 +119,12 @@ int main(int argc, char *argv[]){
 			size_t plen, mlen;
 			pbuf = read_b64( publicfile, &plen );
 
-			int rc = ti25519_verify( pbuf, plen, &mbuf, &mlen, PORT, 10);
+			int rc = i25519_verify( pbuf, plen, &mbuf, &mlen, PORT, 10);
 			debug("rc:%d",rc);
 			if(rc==0){
-				printf("verify success [%s]\n", mbuf);
+				log_info("verify success [%s]", mbuf);
 			}else{
-				printf("verify fail [%s]\n", mbuf);
+				log_info("verify fail [%s]", mbuf);
 			}
 
 			fclose(publicfile);
@@ -133,11 +133,11 @@ int main(int argc, char *argv[]){
 
 		}else{
 			//echo an error
-			lerror("Invalid mode %s, please specify either <setup|ext|prove|verify|test> !\n", argv[1]);
+			log_err("Invalid mode %s, please specify either <setup|ext|prove|verify|test> !", argv[1]);
 		}
 	}else{
 		//echo an error
-		lerror("Insufficient args, please specify either <setup|ext|prove|verify|test> !\n");
+		log_err("Insufficient args, please specify either <setup|ext|prove|verify|test> !");
 	}
 
 	return 0;
