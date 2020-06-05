@@ -256,13 +256,13 @@ extern "C"{
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen,
 		const char *srv, int port,
-		int count
+		unsigned int count
 	);
 
 	//server
 	void ti25519_tserver(
 		unsigned char *pbuffer, size_t plen,
-		int port, int count
+		int port, unsigned int count
 	);
 
 

@@ -26,7 +26,8 @@ int main(int argc, char *argv[]){
 	unsigned char *pbuf, *sbuf, *obuf, *mbuf;
 	size_t plen, slen, mlen, olen;
 
-	clock_t start, end; unsigned int i;
+	clock_t start, end;
+	//unsigned int i;
 	double cpu_time_use = 0;
 
 	if(argc > 1){
@@ -180,9 +181,11 @@ int main(int argc, char *argv[]){
 			}
 			if(csock != -1){
 				//authentication success
+				rc = 1;
 				printf("prove success [%s] 0x%02x\n", mbuf, rc);
 				close(csock); //close it or do something else with it
 			}else{
+				rc = 0;
 				printf("prove fail [%s] 0x%02x\n", mbuf, rc);
 			}
 
@@ -211,7 +214,7 @@ int main(int argc, char *argv[]){
 				obuf = read_b64( uskfile, &olen );
 				pbuf = read_b64( publicfile, &plen );
 				mbuf = (unsigned char *) fileread( idfile, &mlen );
-				int count = 10000;
+				unsigned int count = 10000;
 
 				if( strcmp(argv[2],"prove") == 0 ){
 					if(argc > 3){

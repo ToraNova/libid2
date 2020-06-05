@@ -250,16 +250,17 @@ namespace ti25519 {
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen,
 		const char *srv, int port,
-		int count
+		unsigned int count
 	);
 	//server
 	void tserver(
 		unsigned char *pbuffer, size_t plen,
-		int port, int count
+		int port, unsigned int count
 	);
 
 }
 
+//TODO remove the following lines once the struct feature is implemented
 #define ELE crypto_core_ristretto255_BYTES
 #define SCA crypto_core_ristretto255_SCALARBYTES
 

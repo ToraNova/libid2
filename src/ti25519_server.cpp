@@ -131,7 +131,7 @@ namespace ti25519{
 	void tserver(
 		unsigned char *pbuffer, size_t plen,
 		//void (*callback)(int, int, const unsigned char *, size_t),
-		int port, int count
+		int port, unsigned int count
 	){
 		struct sockaddr_in cli; int rc;
 		int cli_len = sizeof(struct sockaddr_in);

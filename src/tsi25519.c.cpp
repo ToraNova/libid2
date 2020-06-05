@@ -105,7 +105,7 @@ void ti25519_tclient(
 	unsigned char *mbuffer, size_t mlen,
 	unsigned char *obuffer, size_t olen,
 	const char *srv, int port,
-	int count
+	unsigned int count
 ){
 	ti25519::tclient(mbuffer,mlen,obuffer,olen,srv,port,count);
 }
@@ -113,7 +113,7 @@ void ti25519_tclient(
 //server
 void ti25519_tserver(
 	unsigned char *pbuffer, size_t plen,
-	int port, int count
+	int port, unsigned int count
 ){
 	ti25519::tserver(pbuffer,plen,port,count);
 }

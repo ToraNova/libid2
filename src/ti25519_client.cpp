@@ -104,7 +104,7 @@ namespace ti25519{
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen,
 		const char *srv, int port,
-		int count
+		unsigned int count
 	){
 		int tsock;
 		int rc;

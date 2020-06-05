@@ -17,6 +17,14 @@ To install, run following with sufficient privileges (i.e., using su or sudo)
 ```
 make install
 ```
+To compile and test with debugging
+```
+cd debug && ../configure --prefix=/debug
+```
+OR
+```
+../configure CPPFLAGS="-DDEBUG" CFLAGS="-g -O0"
+```
 
 ### Supported IBI Schemes
 The deprecated version of the library found under the deprecate directory supports 3 schemes. This renewed version currently only supports 1.

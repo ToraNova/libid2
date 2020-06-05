@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#include "tsi25519.h"
+#include "tsi25519.hpp"
 
 //internals
-#include "internals/tnc.h"
+#include "internals/tnc.hpp"
 
 //auxiliary helpers
 #include "utils/debug.h"
