@@ -7,9 +7,9 @@
  * this is for internal use only!
  */
 
-#include "tnc.hpp"
+#include "static.hpp"
 
-#include "../utils/bufhelp.h"
+#include "../../utils/bufhelp.h"
 
 // implementation includes (archlinux os stored under /usr/include/sodium)
 //Nacl Finite Field Arithmetic on top of Curve25519
@@ -97,7 +97,7 @@ namespace tnc{
 		if( rc != 0 ) return NULL; //abort if fail
 
 		//store B on the signature
-		memcpy( out->B, key->pub->P1, RS_EPSZ );
+		memcpy( out->B, key->pub->B, RS_EPSZ );
 
 		//compute hash
 		crypto_hash_sha512_init( &eh_state );
@@ -326,9 +326,10 @@ namespace tnc{
 
 	void printsig(struct signat *in){
 		printf("s :"); ucbprint(in->s, RS_SCSZ); printf("\n");
-		printf("x :"); ucbprint(in->s, RS_SCSZ); printf("\n");
+		printf("x :"); ucbprint(in->x, RS_SCSZ); printf("\n");
 		printf("U :"); ucbprint(in->U, RS_EPSZ); printf("\n");
 		printf("V :"); ucbprint(in->V, RS_EPSZ); printf("\n");
+		printf("B :"); ucbprint(in->B, RS_EPSZ); printf("\n");
 	}
 
 }

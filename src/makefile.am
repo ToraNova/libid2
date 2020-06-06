@@ -2,7 +2,8 @@
 # using libtool (different library name to avoid confusion)
 # if this is used, the SHARED library file is also compiled
 lib_LTLIBRARIES = libid2.la
-libid2_la_SOURCES = internals/tnc.cpp internals/tnc.c.cpp \
+libid2_la_SOURCES = internals/proto.cpp \
+		internals/tnc/static.cpp internals/tnc/proto.cpp \
 		ts25519.cpp ti25519.cpp tsi25519.c.cpp \
 		ti25519_client.cpp ti25519_server.cpp \
 		utils/simplesock.c utils/jbase64.c utils/asn1util.c \

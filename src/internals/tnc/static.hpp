@@ -7,6 +7,9 @@
  * this is for internal use only!
  */
 
+#ifndef _TNC_STATIC_HPP_
+#define _TNC_STATIC_HPP_
+
 #define RS_EPSZ crypto_core_ristretto255_BYTES
 #define RS_SCSZ crypto_core_ristretto255_SCALARBYTES
 #define RS_HSSZ crypto_core_ristretto255_HASHBYTES
@@ -78,3 +81,5 @@ namespace tnc {
 	void printsig(struct signat *in);
 
 }
+
+#endif

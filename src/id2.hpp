@@ -26,7 +26,9 @@
 #include "tsi25519.hpp"
 
 //internals
-#include "internals/tnc.hpp"
+#include "internals/proto.hpp"
+#include "internals/tnc/static.hpp"
+#include "internals/tnc/proto.hpp"
 
 //auxiliary helpers
 #include "utils/debug.h"

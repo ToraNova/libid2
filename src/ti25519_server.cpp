@@ -105,10 +105,12 @@ namespace ti25519{
 
 		while(1){
 			csock = accept( ssock, (struct sockaddr *)&cli, (socklen_t*)&cli_len);
+			if(csock < 0){
+				//lerror("Connection failed to establish with %s\n",ipastr);
+				continue;
+			}
 			ipaddr = cli.sin_addr;
 			inet_ntop( AF_INET, &ipaddr, ipastr, INET_ADDRSTRLEN );
-
-			if(csock < 0){lerror("Connection failed to establish with %s\n",ipastr);}
 			debug("Connection established with %s\n",ipastr);
 			rc = verify( pbuffer, plen, &mbuffer, &mlen, csock );
 			callback(rc, csock, mbuffer, mlen ); //runs the callback func

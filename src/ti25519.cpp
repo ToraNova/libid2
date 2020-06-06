@@ -11,6 +11,9 @@
 #include "tsi25519.hpp"
 #include "utils/debug.h"
 
+#include "internals/proto.hpp"
+#include "internals/tnc/proto.hpp"
+
 //mini socket library
 #include "utils/simplesock.h"
 #include <sys/socket.h>
@@ -63,101 +66,29 @@ namespace ti25519{
 		unsigned char *obuffer, size_t olen,
 		int csock
 	){
-		if(csock == -1){lerror("Invalid socket\n");return 1;}
+		if(csock == -1){
+			lerror("Invalid socket\n");
+			return 1;
+		}
 
 		int rc;
-		unsigned char t[SCA], c[SCA], y[SCA];
-		unsigned char tmp[SCA] = {0};
-		unsigned char buf[CONN_MAXBF_SIZE] = {0};
+		//parse the usk
+		struct tnc::signat *usk;
+		usk = tnc::sigstruct(obuffer, olen);
 
 		debug("Sending ID string %s\n",mbuffer);
-		sendbuf(csock, (char *)mbuffer , mlen);
-		//await byte 0x5a before proceeding with protocol
-		if( fixed_recvbuf(csock, (char *)buf, 1) < 0 || buf[0] != 0x5a){
+		rc = general::client::establish( csock, mbuffer, mlen );
+		if(rc != 0){
 			lerror("Failed to recv go-ahead (0x5a) byte\n");
 			return 1;
 		}
 		debug("Go-Ahead received (0x5a), Starting PROVE protocol\n");
-		memset(buf, 0, CONN_MAXBF_SIZE); //reset
 
-		//sample t (commit secret)
-		crypto_core_ristretto255_scalar_random(t);
+		rc = tnc::client::executeproto( csock, mbuffer, mlen, usk );
 
-		//--------------COMPUTE AND SEND COMMIT
-		//CMT <- U',V' T
-		memcpy( buf, obuffer+2*SCA, ELE);
-		memcpy( buf+ELE, obuffer+2*SCA+ELE, ELE);
-		// T = tB
-		rc = crypto_scalarmult_ristretto255( buf+2*ELE, t, obuffer+2*SCA+2*ELE);
-		if( rc != 0 ) return rc; //abort if fail
-
-#ifdef DEBUG
-		size_t j;
-		printf("U :");
-		for(j=0;j<ELE;j++){
-			printf("%02X",buf[j]);
-		}
-		printf("\nV :");
-		for(j=0;j<ELE;j++){
-			printf("%02X",(buf+ELE)[j]);
-		}
-		printf("\nB :");
-		for(j=0;j<ELE;j++){
-			printf("%02X",(obuffer+2*SCA+2*ELE)[j]);
-		}
-		printf("\ns :");
-		for(j=0;j<SCA;j++){
-			printf("%02X",(obuffer)[j]);
-		}
-		printf("\nx :");
-		for(j=0;j<SCA;j++){
-			printf("%02X",(obuffer+SCA)[j]);
-		}
-		printf("\nT :");
-		for(j=0;j<ELE;j++){
-			printf("%02X",(buf+2*ELE)[j]);
-		}
-		printf("\n");
-#endif
-		sendbuf( csock, (char *)buf , 3*ELE); //send CMT
-
-		//--------------RECEIVE CHALLENGE
-		memset(c, 0, SCA); memset(y, 0, SCA);
-		rc = fixed_recvbuf(csock, (char *)c, SCA);
-		if( rc <= 0 ){
-			lerror("Failed to recv CHALLENGE from verifier\n");
-			return 1;
-		}
-
-		//--------------COMPUTE AND SEND RESPONSE
-		// y = t + cs
-		crypto_core_ristretto255_scalar_mul( tmp , c, obuffer ); //
-		crypto_core_ristretto255_scalar_add( y, tmp, t );
-		memset(t, 0, SCA); //PREVENT RESET ATTACKS -- FREE t
-		sendbuf(csock, (char *)y , SCA);
-
-#ifdef DEBUG
-		printf("c :");
-		for(j=0;j<SCA;j++){
-			printf("%02X",(c)[j]);
-		}
-		printf("\ny :");
-		for(j=0;j<SCA;j++){
-			printf("%02X",(y)[j]);
-		}
-		printf("\n");
-#endif
-
-		buf[0] = 0x01;
-		rc = fixed_recvbuf(csock, (char *)buf, 1); //receive final result
-		if( rc <= 0 ){
-			lerror("Failed to recv RESULT from verifier\n");
-			return 1;
-		}
-		debug("Received: %02X\n",buf[0]);
-
-		//return OK
-		return (int) buf[0];
+		//free up the usk
+		sigdestroy(usk);
+		return rc;
 	}
 
 	int verify(

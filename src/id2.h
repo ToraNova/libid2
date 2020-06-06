@@ -25,9 +25,6 @@
 
 #include "tsi25519.h"
 
-//internals
-#include "internals/tnc.h"
-
 //auxiliary helpers
 #include "utils/debug.h"
 #include "utils/jbase64.h"
