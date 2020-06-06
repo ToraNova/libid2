@@ -49,7 +49,7 @@ namespace ts25519
 		tnc::pubserial(key,pbuffer,plen);
 
 #ifdef DEBUG
-tnc::printsec(key);
+tnc::secprint(key);
 printf("sbuffer %lu: ",*slen); ucbprint(*sbuffer, *slen); printf("\n");
 printf("pbuffer %lu: ",*plen); ucbprint(*pbuffer, *plen); printf("\n");
 #endif
@@ -79,7 +79,7 @@ printf("pbuffer %lu: ",*plen); ucbprint(*pbuffer, *plen); printf("\n");
 		tnc::sigserial(sig, obuffer, olen);
 
 #ifdef DEBUG
-printsig(sig);
+sigprint(sig);
 printf("obuffer %lu: ",*olen); ucbprint(*obuffer, *olen); printf("\n");
 #endif
 

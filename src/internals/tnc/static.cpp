@@ -11,14 +11,34 @@
 
 #include "../../utils/bufhelp.h"
 
+//include general constant and macros
+#include "../cmacro.h"
+
 // implementation includes (archlinux os stored under /usr/include/sodium)
 //Nacl Finite Field Arithmetic on top of Curve25519
 #include <sodium.h>
+
+//#include <sodium/crypto_core_ristretto255.h>
+//#include <sodium/crypto_scalarmult_ristretto255.h>
+//#include <sodium/randombytes.h>
+////512bit hash (64byte)
+//#include <sodium/crypto_hash_sha512.h>
+//#include <sodium/crypto_verify_32.h>
 
 // standard lib
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+
+/*
+ * Key storage detail (as of 2020 Mar 22)
+ *
+ * skey - < 256 a >< 256 B >< 256 P1 >< 256 P2 > (msk)
+ * pkey - < 256 B >< 256 P1 >< 256 P2 > (mpk)
+ * sig  - < 256 s >< 256 x >< 256 U >< 256 V >< 256 B > (does not need to store pkey anymore)
+ *
+ */
+
 
 namespace tnc{
 
@@ -67,14 +87,12 @@ namespace tnc{
 		struct signat *out;
 		out = (struct signat *)malloc( sizeof( struct signat) );
 
-		//nonce, r and SHA512 state and a buffer to store
-		crypto_hash_sha512_state eh_state;
+		//nonce, r and hash
 		unsigned char nonce[RS_SCSZ];
-		unsigned char hshe[RS_HSSZ]; //hash
 
 		//allocate for components
 		out->s = (unsigned char *)malloc( RS_SCSZ );
-		out->x = (unsigned char *)malloc( RS_SCSZ );
+		//out->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
 		out->U = (unsigned char *)malloc( RS_EPSZ );
 		out->V = (unsigned char *)malloc( RS_EPSZ );
 		out->B = (unsigned char *)malloc( RS_EPSZ );
@@ -99,15 +117,8 @@ namespace tnc{
 		//store B on the signature
 		memcpy( out->B, key->pub->B, RS_EPSZ );
 
-		//compute hash
-		crypto_hash_sha512_init( &eh_state );
-		crypto_hash_sha512_update( &eh_state, mbuffer, mlen);
-		crypto_hash_sha512_update( &eh_state, out->U, RS_EPSZ);
-		crypto_hash_sha512_update( &eh_state, out->V, RS_EPSZ);
-		crypto_hash_sha512_final( &eh_state, hshe);
-		crypto_core_ristretto255_scalar_reduce(
-			out->x, (const unsigned char *)hshe
-		);
+		out->x = hashexec(mbuffer, mlen, out->U, out->V);
+
 		// s = r + xa
 		crypto_core_ristretto255_scalar_mul( out->s , out->x, key->a );
 		crypto_core_ristretto255_scalar_add( out->s, out->s, nonce );
@@ -121,11 +132,10 @@ namespace tnc{
 		unsigned char *mbuffer, size_t mlen
 	){
 		int rc;
-		crypto_hash_sha512_state eh_state;
 		unsigned char tmp1[RS_EPSZ]; //tmp array
 		unsigned char tmp2[RS_EPSZ]; //tmp array
 		unsigned char tmp3[RS_EPSZ]; //tmp array
-		unsigned char hshe[RS_HSSZ]; //hash
+		unsigned char *xp;
 
 		// U' = sB - xP1
 		rc = crypto_scalarmult_ristretto255(
@@ -159,28 +169,49 @@ namespace tnc{
 		rc = crypto_core_ristretto255_sub( tmp2, tmp1, tmp2 ); //tmp4 V'
 		if( rc != 0 ) return rc; //abort if fail
 
-		//compute hash
-		crypto_hash_sha512_init( &eh_state );
-		crypto_hash_sha512_update( &eh_state, mbuffer, mlen);
-		crypto_hash_sha512_update( &eh_state, tmp3, RS_EPSZ);
-		crypto_hash_sha512_update( &eh_state, tmp2, RS_EPSZ);
-		crypto_hash_sha512_final( &eh_state, hshe);
-		crypto_core_ristretto255_scalar_reduce(
-			tmp1, (const unsigned char *)hshe
-		);
+		xp = hashexec(mbuffer, mlen, tmp3, tmp2);
 
 		//check if tmp is equal to x from obuffer
-		rc = crypto_verify_32( tmp1, sig->x );
+		rc = crypto_verify_32( xp, sig->x );
 
 #ifdef DEBUG
-		printpub(par);
-		printsig(sig);
-		printf("x':"); ucbprint(tmp1, RS_SCSZ); printf("\n");
+		pubprint(par);
+		sigprint(sig);
+		printf("x':"); ucbprint(xp, RS_SCSZ); printf("\n");
 		printf("U':"); ucbprint(tmp3, RS_EPSZ); printf("\n");
 		printf("V':"); ucbprint(tmp2, RS_EPSZ); printf("\n");
 #endif
 
+		//free any allocated stuff
+		hashfree(xp);
+
 		return rc;
+	}
+
+	unsigned char *hashexec(
+		unsigned char *mbuffer, size_t mlen,
+		unsigned char *ubuffer,
+		unsigned char *vbuffer
+	){
+		crypto_hash_sha512_state eh_state;
+		unsigned char hshe[RS_HSSZ]; //hash
+		unsigned char *out = (unsigned char *)malloc( RS_SCSZ );
+
+		//compute hash
+		crypto_hash_sha512_init( &eh_state );
+		crypto_hash_sha512_update( &eh_state, mbuffer, mlen);
+		crypto_hash_sha512_update( &eh_state, ubuffer, RS_EPSZ);
+		crypto_hash_sha512_update( &eh_state, vbuffer, RS_EPSZ);
+		crypto_hash_sha512_final( &eh_state, hshe);
+		crypto_core_ristretto255_scalar_reduce(
+			out, (const unsigned char *)hshe
+		);
+		return out;
+	}
+
+	void hashfree(unsigned char *hash){
+		sodium_memzero(hash, RS_SCSZ);
+		free(hash);
 	}
 
 	void secserial(struct seckey *in, unsigned char **sbuffer, size_t *slen){
@@ -311,20 +342,20 @@ namespace tnc{
 	}
 
 	//debugging use only
-	void printsec(struct seckey *in){
+	void secprint(struct seckey *in){
 		printf("a :"); ucbprint(in->a, RS_SCSZ); printf("\n");
 		printf("B :"); ucbprint(in->pub->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(in->pub->P1, RS_EPSZ); printf("\n");
 		printf("P2:"); ucbprint(in->pub->P2, RS_EPSZ); printf("\n");
 	}
 
-	void printpub(struct pubkey *in){
+	void pubprint(struct pubkey *in){
 		printf("B :"); ucbprint(in->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(in->P1, RS_EPSZ); printf("\n");
 		printf("P2:"); ucbprint(in->P2, RS_EPSZ); printf("\n");
 	}
 
-	void printsig(struct signat *in){
+	void sigprint(struct signat *in){
 		printf("s :"); ucbprint(in->s, RS_SCSZ); printf("\n");
 		printf("x :"); ucbprint(in->x, RS_SCSZ); printf("\n");
 		printf("U :"); ucbprint(in->U, RS_EPSZ); printf("\n");

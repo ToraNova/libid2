@@ -10,10 +10,6 @@
 #ifndef _TNC_STATIC_HPP_
 #define _TNC_STATIC_HPP_
 
-#define RS_EPSZ crypto_core_ristretto255_BYTES
-#define RS_SCSZ crypto_core_ristretto255_SCALARBYTES
-#define RS_HSSZ crypto_core_ristretto255_HASHBYTES
-
 #include <stddef.h>
 
 namespace tnc {
@@ -59,6 +55,16 @@ namespace tnc {
 		unsigned char *mbuffer, size_t mlen
 	);
 
+	// hash( m, u, v) to a scalar in ristretto255
+	// output is always size RS_SCSZ
+	unsigned char *hashexec(
+		unsigned char *mbuffer, size_t mlen,
+		unsigned char *ubuffer,
+		unsigned char *vbuffer
+	);
+	//frees up the hash
+	void hashfree(unsigned char *hash);
+
 	//serialize the secret,public and signature from a structure
 	void secserial(struct seckey *in, unsigned char **sbuffer, size_t *slen);
 	void pubserial(struct seckey *in, unsigned char **pbuffer, size_t *plen);
@@ -76,10 +82,9 @@ namespace tnc {
 	void sigdestroy(struct signat *in);
 
 	//print out key,signature structure (debugging use)
-	void printsec(struct seckey *in);
-	void printpub(struct pubkey *in);
-	void printsig(struct signat *in);
-
+	void secprint(struct seckey *in);
+	void pubprint(struct pubkey *in);
+	void sigprint(struct signat *in);
 }
 
 #endif

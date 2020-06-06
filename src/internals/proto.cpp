@@ -6,6 +6,7 @@
  */
 
 #include "proto.hpp"
+#include "cmacro.h"
 
 //mini socket library
 #include "../utils/debug.h"
@@ -36,10 +37,10 @@ namespace server{
 	int establish(int sock, unsigned char **mbuffer, size_t *mlen){
 		if(sock == -1){return -1;}
 		int rc;
-		unsigned char buf[CONN_MAXBF_SIZE] = {0};
+		unsigned char buf[TS_MAXSZ] = {0};
 		unsigned char ackp[1] = { SIG_GA };
 		//receive ID
-		rc = recvbuf(sock, (char *)buf, CONN_MAXBF_SIZE);
+		rc = recvbuf(sock, (char *)buf, TS_MAXSZ);
 		//if received nothing or zero len string, exit
 		if( rc <= 0 ){return 1;}
 		*mlen = (size_t)rc;

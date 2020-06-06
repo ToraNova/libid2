@@ -138,7 +138,7 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libid2_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libid2_la_OBJECTS = internals/proto.lo internals/tnc/static.lo \
-	internals/tnc/proto.lo ts25519.lo ti25519.lo tsi25519.c.lo \
+	internals/tnc/proto.lo tsi25519.lo tsi25519.c.lo \
 	ti25519_client.lo ti25519_server.lo utils/simplesock.lo \
 	utils/jbase64.lo utils/asn1util.lo utils/futil.lo \
 	utils/bufhelp.lo
@@ -171,10 +171,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/ti25519.Plo \
-	./$(DEPDIR)/ti25519_client.Plo ./$(DEPDIR)/ti25519_server.Plo \
-	./$(DEPDIR)/ts25519.Plo ./$(DEPDIR)/tsi25519.c.Plo \
-	internals/$(DEPDIR)/proto.Plo \
+am__depfiles_remade = ./$(DEPDIR)/ti25519_client.Plo \
+	./$(DEPDIR)/ti25519_server.Plo ./$(DEPDIR)/tsi25519.Plo \
+	./$(DEPDIR)/tsi25519.c.Plo internals/$(DEPDIR)/proto.Plo \
 	internals/tnc/$(DEPDIR)/proto.Plo \
 	internals/tnc/$(DEPDIR)/static.Plo tests/$(DEPDIR)/i25519.Po \
 	tests/$(DEPDIR)/s25519.Po utils/$(DEPDIR)/asn1util.Plo \
@@ -374,7 +373,7 @@ top_srcdir = ../..
 lib_LTLIBRARIES = libid2.la
 libid2_la_SOURCES = internals/proto.cpp \
 		internals/tnc/static.cpp internals/tnc/proto.cpp \
-		ts25519.cpp ti25519.cpp tsi25519.c.cpp \
+		tsi25519.cpp tsi25519.c.cpp \
 		ti25519_client.cpp ti25519_server.cpp \
 		utils/simplesock.c utils/jbase64.c utils/asn1util.c \
 		utils/futil.c utils/bufhelp.c
@@ -532,10 +531,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/ti25519.Plo # am--include-marker
 include ./$(DEPDIR)/ti25519_client.Plo # am--include-marker
 include ./$(DEPDIR)/ti25519_server.Plo # am--include-marker
-include ./$(DEPDIR)/ts25519.Plo # am--include-marker
+include ./$(DEPDIR)/tsi25519.Plo # am--include-marker
 include ./$(DEPDIR)/tsi25519.c.Plo # am--include-marker
 include internals/$(DEPDIR)/proto.Plo # am--include-marker
 include internals/tnc/$(DEPDIR)/proto.Plo # am--include-marker
@@ -768,10 +766,9 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/ti25519.Plo
-	-rm -f ./$(DEPDIR)/ti25519_client.Plo
+		-rm -f ./$(DEPDIR)/ti25519_client.Plo
 	-rm -f ./$(DEPDIR)/ti25519_server.Plo
-	-rm -f ./$(DEPDIR)/ts25519.Plo
+	-rm -f ./$(DEPDIR)/tsi25519.Plo
 	-rm -f ./$(DEPDIR)/tsi25519.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
 	-rm -f internals/tnc/$(DEPDIR)/proto.Plo
@@ -828,10 +825,9 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/ti25519.Plo
-	-rm -f ./$(DEPDIR)/ti25519_client.Plo
+		-rm -f ./$(DEPDIR)/ti25519_client.Plo
 	-rm -f ./$(DEPDIR)/ti25519_server.Plo
-	-rm -f ./$(DEPDIR)/ts25519.Plo
+	-rm -f ./$(DEPDIR)/tsi25519.Plo
 	-rm -f ./$(DEPDIR)/tsi25519.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
 	-rm -f internals/tnc/$(DEPDIR)/proto.Plo

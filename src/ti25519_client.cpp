@@ -17,15 +17,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-// implementation includes (archlinux os stored under /usr/include/sodium)
-//Nacl Finite Field Arithmetic on top of Curve25519
-#include <sodium/crypto_core_ristretto255.h>
-#include <sodium/crypto_scalarmult_ristretto255.h>
-#include <sodium/randombytes.h>
-//512bit hash (64byte)
-#include <sodium/crypto_hash_sha512.h>
-#include <sodium/crypto_verify_32.h>
-
 // standard lib
 #include <cstdlib>
 #include <cstdio>

@@ -37,11 +37,18 @@ namespace tnc {
 		// mbuffer - the client identifying on other end (OUTPUT)
 		int executeproto(
 			int sock,
-			struct pubkey *par,
-			unsigned char **mbuffer, size_t *mlen
+			unsigned char *mbuffer, size_t mlen,
+			struct pubkey *par
 		);
 
 	}
+
+	// an auxiliary function to test param and usk
+	int putest(
+		struct pubkey *par,
+		struct signat *usk,
+		unsigned char *mbuffer, size_t mlen
+	);
 }
 
 #endif

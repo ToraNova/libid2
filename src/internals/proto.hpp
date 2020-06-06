@@ -8,9 +8,6 @@
 #ifndef _GEN_PROTO_HPP_
 #define _GEN_PROTO_HPP_
 
-//go-ahead
-#define SIG_GA 0x5a
-
 #include <stddef.h>
 
 namespace general{
