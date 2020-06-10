@@ -1,5 +1,5 @@
 /*
- * TNC signature scheme key structure
+ * <TEMPLATE> signature scheme key structure
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -7,8 +7,8 @@
  * this is for internal use only!
  */
 
-#ifndef _TNC_STATIC_HPP_
-#define _TNC_STATIC_HPP_
+#ifndef _<TEMPLATE>_STATIC_HPP_
+#define _<TEMPLATE>_STATIC_HPP_
 
 // Size definitions TODO: please edit NEPC and NSCC accordingly
 // for Curve25519 keys
@@ -30,8 +30,9 @@
 
 #include <stddef.h>
 
-namespace tnc {
+namespace <TEMPLATE> {
 
+	//TODO: change the key structures
 	struct pubkey{
 		unsigned char *B;
 		unsigned char *P1;

@@ -16,6 +16,10 @@ extern "C"{
 #endif
 
 	void ucbprint(unsigned char *buf, size_t sz);
+	//copy src to dest+skip with size, return the next 'skip' value
+	size_t copyskip(unsigned char *dest, unsigned char *src, size_t skip, size_t size);
+	//copy src+skip to dest with size, return the next 'skip' value
+	size_t skipcopy(unsigned char *dest, unsigned char *src, size_t skip, size_t size);
 
 #ifdef __cplusplus
 };
