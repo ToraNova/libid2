@@ -1,5 +1,5 @@
 /*
- * <TEMPLATE> - id2 library
+ * internals/tnc25519/static.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * <TEMPLATE> signature scheme key structure
+ * TNC signature scheme key structure
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -32,8 +32,8 @@
  * this is for internal use only!
  */
 
-#ifndef _<TEMPLATE>_STATIC_HPP_
-#define _<TEMPLATE>_STATIC_HPP_
+#ifndef _TNC25519_STATIC_HPP_
+#define _TNC25519_STATIC_HPP_
 
 // Size definitions TODO: please edit NEPC and NSCC accordingly
 // for Curve25519 keys
@@ -55,9 +55,8 @@
 
 #include <stddef.h>
 
-namespace <TEMPLATE> {
+namespace tnc {
 
-	//TODO: change the key structures
 	struct pubkey{
 		unsigned char *B;
 		unsigned char *P1;

@@ -1,5 +1,5 @@
 /*
- * <TEMPLATE> - id2 library
+ * internals/tnc/static.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * <TEMPLATE> signature scheme key conversion functions
+ * TNC signature scheme key conversion functions
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -66,17 +66,40 @@
  */
 
 
-namespace <TEMPLATE>{
+namespace tnc{
 
 	struct seckey *randomkey(){
 		int rc;
 		//declare and allocate memory for key
 		struct seckey *out;
 		out = (struct seckey *)malloc( sizeof(struct seckey) );
+
 		//allocate memory for pubkey
 		out->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
-		//TODO
+		//allocate memory for the elements and scalars
+		out->a = (unsigned char *)malloc( RS_SCSZ );
+		out->pub->B = (unsigned char *)malloc( RS_EPSZ );
+		out->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
+		out->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
+
+		//sample a and B
+		crypto_core_ristretto255_scalar_random( out->a );
+		crypto_core_ristretto255_random( out->pub->B );
+
+		rc = crypto_scalarmult_ristretto255(
+				out->pub->P1,
+				out->a,
+				out->pub->B
+				); // P1 = aB
+		if( rc != 0 ) return NULL; //abort if fail
+
+		rc = crypto_scalarmult_ristretto255(
+				out->pub->P2,
+				out->a,
+				out->pub->P1
+				); // P2 = aP1
+		if( rc != 0 ) return NULL; //abort if fail
 
 		return out;
 	}
@@ -90,7 +113,41 @@ namespace <TEMPLATE>{
 		struct signat *out;
 		out = (struct signat *)malloc( sizeof( struct signat) );
 
-		//TODO
+		//nonce, r and hash
+		unsigned char nonce[RS_SCSZ];
+
+		//allocate for components
+		out->s = (unsigned char *)malloc( RS_SCSZ );
+		//out->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
+		out->U = (unsigned char *)malloc( RS_EPSZ );
+		out->V = (unsigned char *)malloc( RS_EPSZ );
+		out->B = (unsigned char *)malloc( RS_EPSZ );
+
+		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
+		crypto_core_ristretto255_scalar_random(nonce);
+
+		rc = crypto_scalarmult_ristretto255(
+				out->U,
+				nonce,
+				key->pub->B
+				); // U = rB
+		if( rc != 0 ) return NULL; //abort if fail
+
+		rc = crypto_scalarmult_ristretto255(
+				out->V,
+				nonce,
+				key->pub->P1
+				); // V = rP1
+		if( rc != 0 ) return NULL; //abort if fail
+
+		//store B on the signature
+		memcpy( out->B, key->pub->B, RS_EPSZ );
+
+		out->x = hashexec(mbuffer, mlen, out->U, out->V);
+
+		// s = r + xa
+		crypto_core_ristretto255_scalar_mul( out->s , out->x, key->a );
+		crypto_core_ristretto255_scalar_add( out->s, out->s, nonce );
 
 		return out;
 	}
@@ -101,8 +158,58 @@ namespace <TEMPLATE>{
 		unsigned char *mbuffer, size_t mlen
 	){
 		int rc;
+		unsigned char tmp1[RS_EPSZ]; //tmp array
+		unsigned char tmp2[RS_EPSZ]; //tmp array
+		unsigned char tmp3[RS_EPSZ]; //tmp array
+		unsigned char *xp;
 
-		//TODO
+		// U' = sB - xP1
+		rc = crypto_scalarmult_ristretto255(
+				tmp1,
+				sig->s,
+				par->B
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_scalarmult_ristretto255(
+				tmp2,
+				sig->x,
+				par->P1
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_core_ristretto255_sub( tmp3, tmp1, tmp2 ); //tmp3 U'
+		if( rc != 0 ) return rc; //abort if fail
+
+		// V' = sP1 - xP2
+		rc = crypto_scalarmult_ristretto255(
+				tmp1,
+				sig->s,
+				par->P1
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_scalarmult_ristretto255(
+				tmp2,
+				sig->x,
+				par->P2
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_core_ristretto255_sub( tmp2, tmp1, tmp2 ); //tmp4 V'
+		if( rc != 0 ) return rc; //abort if fail
+
+		xp = hashexec(mbuffer, mlen, tmp3, tmp2);
+
+		//check if tmp is equal to x from obuffer
+		rc = crypto_verify_32( xp, sig->x );
+
+#ifdef DEBUG
+		pubprint(par);
+		sigprint(sig);
+		printf("x':"); ucbprint(xp, RS_SCSZ); printf("\n");
+		printf("U':"); ucbprint(tmp3, RS_EPSZ); printf("\n");
+		printf("V':"); ucbprint(tmp2, RS_EPSZ); printf("\n");
+#endif
+
+		//free any allocated stuff
+		hashfree(xp);
 
 		return rc;
 	}
@@ -115,8 +222,6 @@ namespace <TEMPLATE>{
 		crypto_hash_sha512_state eh_state;
 		unsigned char hshe[RS_HSSZ]; //hash
 		unsigned char *out = (unsigned char *)malloc( RS_SCSZ );
-
-		//TODO?
 
 		//compute hash
 		crypto_hash_sha512_init( &eh_state );
@@ -141,8 +246,6 @@ namespace <TEMPLATE>{
 		*slen = SKEY_SZ;
 		*sbuffer = (unsigned char *)malloc( *(slen) );
 
-		//TODO
-
 		//a, B, P1, P2
 		rs = copyskip( *sbuffer, in->a, 	0, 	RS_SCSZ);
 		rs = copyskip( *sbuffer, in->pub->B, 	rs, 	RS_EPSZ);
@@ -157,8 +260,10 @@ namespace <TEMPLATE>{
 		*plen = PKEY_SZ;
 		*pbuffer = (unsigned char *)malloc( *(plen) );
 
-		//TODO
-
+		//B, P1, P2
+		rs = copyskip( *pbuffer, in->pub->B, 	0, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, in->pub->P1, 	rs, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, in->pub->P2, 	rs, 	RS_EPSZ);
 		return rs;
 	}
 
@@ -168,8 +273,12 @@ namespace <TEMPLATE>{
 		*olen = SGNT_SZ;
 		*obuffer = (unsigned char *)malloc( *(olen) );
 
-		//TODO
-
+		//s,x,U,V,B
+		rs = copyskip( *obuffer, in->s, 	0, 	RS_SCSZ);
+		rs = copyskip( *obuffer, in->x, 	rs, 	RS_SCSZ);
+		rs = copyskip( *obuffer, in->U, 	rs, 	RS_EPSZ);
+		rs = copyskip( *obuffer, in->V, 	rs, 	RS_EPSZ);
+		rs = copyskip( *obuffer, in->B, 	rs, 	RS_EPSZ);
 		return rs;
 	}
 
@@ -179,8 +288,6 @@ namespace <TEMPLATE>{
 		out = (struct seckey *)malloc( sizeof(struct seckey));
 		//allocate memory for pubkey
 		out->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
-
-		//TODO
 
 		//allocate memory for the elements and scalars
 		out->a = (unsigned char *)malloc( RS_SCSZ );
@@ -201,8 +308,14 @@ namespace <TEMPLATE>{
 		//allocate memory for pubkey
 		out = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
-		//TODO
+		//allocate memory for the elements
+		out->B = (unsigned char *)malloc( RS_EPSZ );
+		out->P1 = (unsigned char *)malloc( RS_EPSZ );
+		out->P2 = (unsigned char *)malloc( RS_EPSZ );
 
+		rs = skipcopy( out->B,		pbuffer, 0, 	RS_EPSZ);
+		rs = skipcopy( out->P1,		pbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( out->P2,		pbuffer, rs, 	RS_EPSZ);
 		return out;
 	}
 
@@ -211,8 +324,18 @@ namespace <TEMPLATE>{
 		//allocate memory for pubkey
 		out = (struct signat *)malloc( sizeof(struct signat) );
 
-		//TODO
+		//allocate for components on signature struct
+		out->s = (unsigned char *)malloc( RS_SCSZ );
+		out->x = (unsigned char *)malloc( RS_SCSZ );
+		out->U = (unsigned char *)malloc( RS_EPSZ );
+		out->V = (unsigned char *)malloc( RS_EPSZ );
+		out->B = (unsigned char *)malloc( RS_EPSZ );
 
+		rs = skipcopy( out->s,		obuffer, 0, 	RS_SCSZ);
+		rs = skipcopy( out->x,		obuffer, rs, 	RS_SCSZ);
+		rs = skipcopy( out->U,		obuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( out->V,		obuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( out->B,		obuffer, rs, 	RS_EPSZ);
 		return out;
 	}
 
@@ -221,8 +344,6 @@ namespace <TEMPLATE>{
 		//zero out the secret component
 		sodium_memzero(in->a, RS_SCSZ);
 
-		//TODO
-
 		//free memory
 		free(in->a);
 		pubdestroy(in->pub);
@@ -230,7 +351,6 @@ namespace <TEMPLATE>{
 	}
 
 	void pubdestroy(struct pubkey *in){
-		//TODO
 		//free up memory
 		free(in->B);
 		free(in->P1);
@@ -239,7 +359,6 @@ namespace <TEMPLATE>{
 	}
 
 	void sigdestroy(struct signat *in){
-		//TODO
 		//clear the components
 		sodium_memzero(in->s, RS_SCSZ);
 		sodium_memzero(in->x, RS_SCSZ);
@@ -256,7 +375,6 @@ namespace <TEMPLATE>{
 
 	//debugging use only
 	void secprint(struct seckey *in){
-		//TODO
 		printf("a :"); ucbprint(in->a, RS_SCSZ); printf("\n");
 		printf("B :"); ucbprint(in->pub->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(in->pub->P1, RS_EPSZ); printf("\n");
@@ -264,14 +382,12 @@ namespace <TEMPLATE>{
 	}
 
 	void pubprint(struct pubkey *in){
-		//TODO
 		printf("B :"); ucbprint(in->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(in->P1, RS_EPSZ); printf("\n");
 		printf("P2:"); ucbprint(in->P2, RS_EPSZ); printf("\n");
 	}
 
 	void sigprint(struct signat *in){
-		//TODO
 		printf("s :"); ucbprint(in->s, RS_SCSZ); printf("\n");
 		printf("x :"); ucbprint(in->x, RS_SCSZ); printf("\n");
 		printf("U :"); ucbprint(in->U, RS_EPSZ); printf("\n");

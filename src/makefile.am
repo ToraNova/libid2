@@ -3,9 +3,8 @@
 # if this is used, the SHARED library file is also compiled
 lib_LTLIBRARIES = libid2.la
 libid2_la_SOURCES = internals/proto.cpp \
-		internals/tnc/static.cpp internals/tnc/proto.cpp \
-		tsi25519.cpp tsi25519.c.cpp \
-		ti25519_client.cpp ti25519_server.cpp \
+		internals/tnc25519/static.cpp internals/tnc25519/proto.cpp \
+		a25519.cpp a25519.c.cpp \
 		utils/simplesock.c utils/jbase64.c utils/asn1util.c \
 		utils/futil.c utils/bufhelp.c
 libid2_la_LDFLAGS = -lsodium
@@ -14,8 +13,6 @@ libid2_la_LDFLAGS = -lsodium
 include_HEADERS = id2.h id2.hpp
 
 # define programs to be compiled and installed; $(bindir) @default /usr/local/bin
-noinst_PROGRAMS = i25519 s25519
-i25519_SOURCES = tests/i25519.c
-s25519_SOURCES = tests/s25519.c
-i25519_LDADD = libid2.la
-s25519_LDADD = libid2.la
+noinst_PROGRAMS = a25519
+a25519_SOURCES = tests/a25519.c
+a25519_LDADD = libid2.la

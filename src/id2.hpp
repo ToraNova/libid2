@@ -23,7 +23,9 @@
  * SOFTWARE.
  */
 
-#include "tsi25519.hpp"
+#ifndef _ID2_HPP_
+#define _ID2_HPP_
+#include "a25519.hpp"
 
 //internals
 #include "internals/proto.hpp"
@@ -36,3 +38,6 @@
 #include "utils/futil.h"
 #include "utils/asn1util.h"
 
+#include "internals/internals.h"
+
+#endif

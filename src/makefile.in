@@ -90,7 +90,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = i25519$(EXEEXT) s25519$(EXEEXT)
+noinst_PROGRAMS = a25519$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -137,11 +137,10 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libid2_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libid2_la_OBJECTS = internals/proto.lo internals/tnc/static.lo \
-	internals/tnc/proto.lo tsi25519.lo tsi25519.c.lo \
-	ti25519_client.lo ti25519_server.lo utils/simplesock.lo \
-	utils/jbase64.lo utils/asn1util.lo utils/futil.lo \
-	utils/bufhelp.lo
+am_libid2_la_OBJECTS = internals/proto.lo internals/tnc25519/static.lo \
+	internals/tnc25519/proto.lo a25519.lo a25519.c.lo \
+	utils/simplesock.lo utils/jbase64.lo utils/asn1util.lo \
+	utils/futil.lo utils/bufhelp.lo
 libid2_la_OBJECTS = $(am_libid2_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -150,12 +149,9 @@ am__v_lt_1 =
 libid2_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libid2_la_LDFLAGS) $(LDFLAGS) -o $@
-am_i25519_OBJECTS = tests/i25519.$(OBJEXT)
-i25519_OBJECTS = $(am_i25519_OBJECTS)
-i25519_DEPENDENCIES = libid2.la
-am_s25519_OBJECTS = tests/s25519.$(OBJEXT)
-s25519_OBJECTS = $(am_s25519_OBJECTS)
-s25519_DEPENDENCIES = libid2.la
+am_a25519_OBJECTS = tests/a25519.$(OBJEXT)
+a25519_OBJECTS = $(am_a25519_OBJECTS)
+a25519_DEPENDENCIES = libid2.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -171,12 +167,11 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/ti25519_client.Plo \
-	./$(DEPDIR)/ti25519_server.Plo ./$(DEPDIR)/tsi25519.Plo \
-	./$(DEPDIR)/tsi25519.c.Plo internals/$(DEPDIR)/proto.Plo \
-	internals/tnc/$(DEPDIR)/proto.Plo \
-	internals/tnc/$(DEPDIR)/static.Plo tests/$(DEPDIR)/i25519.Po \
-	tests/$(DEPDIR)/s25519.Po utils/$(DEPDIR)/asn1util.Plo \
+am__depfiles_remade = ./$(DEPDIR)/a25519.Plo ./$(DEPDIR)/a25519.c.Plo \
+	internals/$(DEPDIR)/proto.Plo \
+	internals/tnc25519/$(DEPDIR)/proto.Plo \
+	internals/tnc25519/$(DEPDIR)/static.Plo \
+	tests/$(DEPDIR)/a25519.Po utils/$(DEPDIR)/asn1util.Plo \
 	utils/$(DEPDIR)/bufhelp.Plo utils/$(DEPDIR)/futil.Plo \
 	utils/$(DEPDIR)/jbase64.Plo utils/$(DEPDIR)/simplesock.Plo
 am__mv = mv -f
@@ -216,9 +211,8 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libid2_la_SOURCES) $(i25519_SOURCES) $(s25519_SOURCES)
-DIST_SOURCES = $(libid2_la_SOURCES) $(i25519_SOURCES) \
-	$(s25519_SOURCES)
+SOURCES = $(libid2_la_SOURCES) $(a25519_SOURCES)
+DIST_SOURCES = $(libid2_la_SOURCES) $(a25519_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -372,9 +366,8 @@ top_srcdir = @top_srcdir@
 # if this is used, the SHARED library file is also compiled
 lib_LTLIBRARIES = libid2.la
 libid2_la_SOURCES = internals/proto.cpp \
-		internals/tnc/static.cpp internals/tnc/proto.cpp \
-		tsi25519.cpp tsi25519.c.cpp \
-		ti25519_client.cpp ti25519_server.cpp \
+		internals/tnc25519/static.cpp internals/tnc25519/proto.cpp \
+		a25519.cpp a25519.c.cpp \
 		utils/simplesock.c utils/jbase64.c utils/asn1util.c \
 		utils/futil.c utils/bufhelp.c
 
@@ -382,10 +375,8 @@ libid2_la_LDFLAGS = -lsodium
 
 # header files to be installed; $(includedir) @default /usr/local/include
 include_HEADERS = id2.h id2.hpp
-i25519_SOURCES = tests/i25519.c
-s25519_SOURCES = tests/s25519.c
-i25519_LDADD = libid2.la
-s25519_LDADD = libid2.la
+a25519_SOURCES = tests/a25519.c
+a25519_LDADD = libid2.la
 all: all-am
 
 .SUFFIXES:
@@ -471,16 +462,16 @@ internals/$(DEPDIR)/$(am__dirstamp):
 	@: > internals/$(DEPDIR)/$(am__dirstamp)
 internals/proto.lo: internals/$(am__dirstamp) \
 	internals/$(DEPDIR)/$(am__dirstamp)
-internals/tnc/$(am__dirstamp):
-	@$(MKDIR_P) internals/tnc
-	@: > internals/tnc/$(am__dirstamp)
-internals/tnc/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) internals/tnc/$(DEPDIR)
-	@: > internals/tnc/$(DEPDIR)/$(am__dirstamp)
-internals/tnc/static.lo: internals/tnc/$(am__dirstamp) \
-	internals/tnc/$(DEPDIR)/$(am__dirstamp)
-internals/tnc/proto.lo: internals/tnc/$(am__dirstamp) \
-	internals/tnc/$(DEPDIR)/$(am__dirstamp)
+internals/tnc25519/$(am__dirstamp):
+	@$(MKDIR_P) internals/tnc25519
+	@: > internals/tnc25519/$(am__dirstamp)
+internals/tnc25519/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) internals/tnc25519/$(DEPDIR)
+	@: > internals/tnc25519/$(DEPDIR)/$(am__dirstamp)
+internals/tnc25519/static.lo: internals/tnc25519/$(am__dirstamp) \
+	internals/tnc25519/$(DEPDIR)/$(am__dirstamp)
+internals/tnc25519/proto.lo: internals/tnc25519/$(am__dirstamp) \
+	internals/tnc25519/$(DEPDIR)/$(am__dirstamp)
 utils/$(am__dirstamp):
 	@$(MKDIR_P) utils
 	@: > utils/$(am__dirstamp)
@@ -505,25 +496,19 @@ tests/$(am__dirstamp):
 tests/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) tests/$(DEPDIR)
 	@: > tests/$(DEPDIR)/$(am__dirstamp)
-tests/i25519.$(OBJEXT): tests/$(am__dirstamp) \
+tests/a25519.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
-i25519$(EXEEXT): $(i25519_OBJECTS) $(i25519_DEPENDENCIES) $(EXTRA_i25519_DEPENDENCIES) 
-	@rm -f i25519$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(i25519_OBJECTS) $(i25519_LDADD) $(LIBS)
-tests/s25519.$(OBJEXT): tests/$(am__dirstamp) \
-	tests/$(DEPDIR)/$(am__dirstamp)
-
-s25519$(EXEEXT): $(s25519_OBJECTS) $(s25519_DEPENDENCIES) $(EXTRA_s25519_DEPENDENCIES) 
-	@rm -f s25519$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(s25519_OBJECTS) $(s25519_LDADD) $(LIBS)
+a25519$(EXEEXT): $(a25519_OBJECTS) $(a25519_DEPENDENCIES) $(EXTRA_a25519_DEPENDENCIES) 
+	@rm -f a25519$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(a25519_OBJECTS) $(a25519_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f internals/*.$(OBJEXT)
 	-rm -f internals/*.lo
-	-rm -f internals/tnc/*.$(OBJEXT)
-	-rm -f internals/tnc/*.lo
+	-rm -f internals/tnc25519/*.$(OBJEXT)
+	-rm -f internals/tnc25519/*.lo
 	-rm -f tests/*.$(OBJEXT)
 	-rm -f utils/*.$(OBJEXT)
 	-rm -f utils/*.lo
@@ -531,15 +516,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ti25519_client.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ti25519_server.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsi25519.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsi25519.c.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a25519.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a25519.c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@internals/$(DEPDIR)/proto.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@internals/tnc/$(DEPDIR)/proto.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@internals/tnc/$(DEPDIR)/static.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/i25519.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/s25519.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@internals/tnc25519/$(DEPDIR)/proto.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@internals/tnc25519/$(DEPDIR)/static.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/a25519.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/asn1util.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/bufhelp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/futil.Plo@am__quote@ # am--include-marker
@@ -606,7 +588,7 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf internals/.libs internals/_libs
-	-rm -rf internals/tnc/.libs internals/tnc/_libs
+	-rm -rf internals/tnc25519/.libs internals/tnc25519/_libs
 	-rm -rf utils/.libs utils/_libs
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
@@ -750,8 +732,8 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f internals/$(DEPDIR)/$(am__dirstamp)
 	-rm -f internals/$(am__dirstamp)
-	-rm -f internals/tnc/$(DEPDIR)/$(am__dirstamp)
-	-rm -f internals/tnc/$(am__dirstamp)
+	-rm -f internals/tnc25519/$(DEPDIR)/$(am__dirstamp)
+	-rm -f internals/tnc25519/$(am__dirstamp)
 	-rm -f tests/$(DEPDIR)/$(am__dirstamp)
 	-rm -f tests/$(am__dirstamp)
 	-rm -f utils/$(DEPDIR)/$(am__dirstamp)
@@ -766,15 +748,12 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/ti25519_client.Plo
-	-rm -f ./$(DEPDIR)/ti25519_server.Plo
-	-rm -f ./$(DEPDIR)/tsi25519.Plo
-	-rm -f ./$(DEPDIR)/tsi25519.c.Plo
+		-rm -f ./$(DEPDIR)/a25519.Plo
+	-rm -f ./$(DEPDIR)/a25519.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
-	-rm -f internals/tnc/$(DEPDIR)/proto.Plo
-	-rm -f internals/tnc/$(DEPDIR)/static.Plo
-	-rm -f tests/$(DEPDIR)/i25519.Po
-	-rm -f tests/$(DEPDIR)/s25519.Po
+	-rm -f internals/tnc25519/$(DEPDIR)/proto.Plo
+	-rm -f internals/tnc25519/$(DEPDIR)/static.Plo
+	-rm -f tests/$(DEPDIR)/a25519.Po
 	-rm -f utils/$(DEPDIR)/asn1util.Plo
 	-rm -f utils/$(DEPDIR)/bufhelp.Plo
 	-rm -f utils/$(DEPDIR)/futil.Plo
@@ -825,15 +804,12 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/ti25519_client.Plo
-	-rm -f ./$(DEPDIR)/ti25519_server.Plo
-	-rm -f ./$(DEPDIR)/tsi25519.Plo
-	-rm -f ./$(DEPDIR)/tsi25519.c.Plo
+		-rm -f ./$(DEPDIR)/a25519.Plo
+	-rm -f ./$(DEPDIR)/a25519.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
-	-rm -f internals/tnc/$(DEPDIR)/proto.Plo
-	-rm -f internals/tnc/$(DEPDIR)/static.Plo
-	-rm -f tests/$(DEPDIR)/i25519.Po
-	-rm -f tests/$(DEPDIR)/s25519.Po
+	-rm -f internals/tnc25519/$(DEPDIR)/proto.Plo
+	-rm -f internals/tnc25519/$(DEPDIR)/static.Plo
+	-rm -f tests/$(DEPDIR)/a25519.Po
 	-rm -f utils/$(DEPDIR)/asn1util.Plo
 	-rm -f utils/$(DEPDIR)/bufhelp.Plo
 	-rm -f utils/$(DEPDIR)/futil.Plo

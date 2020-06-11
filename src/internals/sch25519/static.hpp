@@ -1,5 +1,5 @@
 /*
- * <TEMPLATE> - id2 library
+ * SCH25519 - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * <TEMPLATE> signature scheme key structure
+ * SCH25519 signature scheme key structure
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -32,8 +32,8 @@
  * this is for internal use only!
  */
 
-#ifndef _<TEMPLATE>_STATIC_HPP_
-#define _<TEMPLATE>_STATIC_HPP_
+#ifndef _SCH25519_STATIC_HPP_
+#define _SCH25519_STATIC_HPP_
 
 // Size definitions TODO: please edit NEPC and NSCC accordingly
 // for Curve25519 keys
@@ -55,7 +55,7 @@
 
 #include <stddef.h>
 
-namespace <TEMPLATE> {
+namespace SCH25519 {
 
 	//TODO: change the key structures
 	struct pubkey{
