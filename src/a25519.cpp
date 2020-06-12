@@ -40,6 +40,8 @@
 
 //internals
 #include "internals/proto.hpp"
+#include "internals/ifcall.hpp"
+//to be deleted once the iftable completes
 #include "internals/tnc25519/static.hpp"
 #include "internals/tnc25519/proto.hpp"
 
@@ -62,24 +64,25 @@ namespace a25519
 		unsigned char **pbuffer, size_t *plen,
 		unsigned char **sbuffer, size_t *slen
 	){
-		//create a key structure
-		struct tnc::seckey *key;
+		//create a key
+		void *key;
 		//generate random key
-		key = tnc::randomkey();
+		//tnc25519::randomkey(&key);
+		iftable[algotype]->randkeygen(&key);
 		if(key == NULL)return 1;
 
 		//serialize the key to string
-		tnc::secserial(key,sbuffer,slen);
-		tnc::pubserial(key,pbuffer,plen);
+		tnc25519::secserial(key,sbuffer,slen);
+		tnc25519::pubserial(key,pbuffer,plen);
 
 #ifdef DEBUG
-tnc::secprint(key);
+tnc25519::secprint(key);
 printf("sbuffer %lu: ",*slen); ucbprint(*sbuffer, *slen); printf("\n");
 printf("pbuffer %lu: ",*plen); ucbprint(*pbuffer, *plen); printf("\n");
 #endif
 
 		//clear the key
-		secdestroy(key);
+		tnc25519::secdestroy(key);
 
 		return 0;
 	}
@@ -92,18 +95,18 @@ namespace sig{
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char **obuffer, size_t *olen
 	){
-		struct tnc::seckey *key;
-		struct tnc::signat *sig;
+		struct tnc25519::seckey *key;
+		struct tnc25519::signat *sig;
 		//obtain key from serialize string
-		key = tnc::secstruct(sbuffer, slen);
+		key = tnc25519::secstruct(sbuffer, slen);
 		//signature generation
-		sig = tnc::signatgen(key, mbuffer, mlen);
+		sig = tnc25519::signatgen(key, mbuffer, mlen);
 
 		//clear the secret key
 		secdestroy(key);
 
 		//serialize the signature to string
-		tnc::sigserial(sig, obuffer, olen);
+		tnc25519::sigserial(sig, obuffer, olen);
 
 #ifdef DEBUG
 sigprint(sig);
@@ -124,10 +127,10 @@ printf("obuffer %lu: ",*olen); ucbprint(*obuffer, *olen); printf("\n");
 	){
 		int rc;
 		//obtain paramter (public key) and signature from serialize string
-		struct tnc::pubkey *par;
-		struct tnc::signat *sig;
-		par = tnc::pubstruct(pbuffer, plen);
-		sig = tnc::sigstruct(obuffer, olen);
+		struct tnc25519::pubkey *par;
+		struct tnc25519::signat *sig;
+		par = tnc25519::pubstruct(pbuffer, plen);
+		sig = tnc25519::sigstruct(obuffer, olen);
 
 		rc = signatchk(par, sig, mbuffer, mlen);
 
@@ -152,7 +155,7 @@ namespace ibi{
 
 		int rc;
 		//parse the usk
-		struct tnc::signat *usk = tnc::sigstruct(obuffer, olen);
+		struct tnc25519::signat *usk = tnc25519::sigstruct(obuffer, olen);
 
 		debug("Sending ID string %s\n",mbuffer);
 		rc = general::client::establish( csock, mbuffer, mlen );
@@ -162,10 +165,10 @@ namespace ibi{
 		}
 		debug("Go-Ahead received (0x5a), Starting PROVE protocol\n");
 
-		rc = tnc::client::executeproto( csock, mbuffer, mlen, usk );
+		rc = tnc25519::client::executeproto( csock, mbuffer, mlen, usk );
 
 		//free up the usk
-		tnc::sigdestroy(usk);
+		tnc25519::sigdestroy(usk);
 		return rc;
 	}
 
@@ -182,7 +185,7 @@ namespace ibi{
 
 		int rc;
 		//parse the params (public key)
-		struct tnc::pubkey *par = tnc::pubstruct(pbuffer, plen);
+		struct tnc25519::pubkey *par = tnc25519::pubstruct(pbuffer, plen);
 
 		rc = general::server::establish( csock, mbuffer, mlen );
 		if(rc != 0){
@@ -190,10 +193,10 @@ namespace ibi{
 			return 1;
 		}
 		debug("Go-Ahead sent (0x5a), Starting VERIFY protocol\n");
-		rc = tnc::server::executeproto( csock, *mbuffer, *mlen, par );
+		rc = tnc25519::server::executeproto( csock, *mbuffer, *mlen, par );
 
 		//free up
-		tnc::pubdestroy(par);
+		tnc25519::pubdestroy(par);
 		return rc;
 	}
 
@@ -346,15 +349,15 @@ namespace test{
 		unsigned char *obuffer, size_t olen
 	){
 		int rc;
-		struct tnc::pubkey *par = tnc::pubstruct(pbuffer, plen);
-		struct tnc::signat *usk = tnc::sigstruct(obuffer, olen);
+		struct tnc25519::pubkey *par = tnc25519::pubstruct(pbuffer, plen);
+		struct tnc25519::signat *usk = tnc25519::sigstruct(obuffer, olen);
 
 		//run test
-		rc = tnc::putest(par, usk, mbuffer, mlen);
+		rc = tnc25519::putest(par, usk, mbuffer, mlen);
 
 		//clear out
-		tnc::pubdestroy(par);
-		tnc::sigdestroy(usk);
+		tnc25519::pubdestroy(par);
+		tnc25519::sigdestroy(usk);
 
 		return rc;
 	}

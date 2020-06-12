@@ -1,5 +1,5 @@
 /*
- * internals/tnc/static.cpp - id2 library
+ * internals/tnc25519/static.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -65,43 +65,50 @@
  *
  */
 
+namespace tnc25519{
 
-namespace tnc{
-
-	struct seckey *randomkey(){
+	void randomkey(void **out){
 		int rc;
 		//declare and allocate memory for key
-		struct seckey *out;
-		out = (struct seckey *)malloc( sizeof(struct seckey) );
+		struct seckey *tmp;
+		tmp = (struct seckey *)malloc( sizeof(struct seckey) );
 
 		//allocate memory for pubkey
-		out->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
+		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements and scalars
-		out->a = (unsigned char *)malloc( RS_SCSZ );
-		out->pub->B = (unsigned char *)malloc( RS_EPSZ );
-		out->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
-		out->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
 		//sample a and B
-		crypto_core_ristretto255_scalar_random( out->a );
-		crypto_core_ristretto255_random( out->pub->B );
+		crypto_core_ristretto255_scalar_random( tmp->a );
+		crypto_core_ristretto255_random( tmp->pub->B );
 
 		rc = crypto_scalarmult_ristretto255(
-				out->pub->P1,
-				out->a,
-				out->pub->B
+				tmp->pub->P1,
+				tmp->a,
+				tmp->pub->B
 				); // P1 = aB
-		if( rc != 0 ) return NULL; //abort if fail
+		if( rc != 0 ){
+			//abort if fail
+			*out = NULL;
+			return;
+		}
 
 		rc = crypto_scalarmult_ristretto255(
-				out->pub->P2,
-				out->a,
-				out->pub->P1
+				tmp->pub->P2,
+				tmp->a,
+				tmp->pub->P1
 				); // P2 = aP1
-		if( rc != 0 ) return NULL; //abort if fail
+		if( rc != 0 ){
+			//abort if fail
+			*out = NULL;
+			return;
+		}
 
-		return out;
+		*out = (void *) tmp;
 	}
 
 	struct signat *signatgen(
@@ -240,30 +247,33 @@ namespace tnc{
 		free(hash);
 	}
 
-	size_t secserial(struct seckey *in, unsigned char **sbuffer, size_t *slen){
+	size_t secserial(void *in, unsigned char **sbuffer, size_t *slen){
 		size_t rs;
+		struct seckey *ri = (struct seckey *)in; //recast the key
 		//set size and allocate
 		*slen = SKEY_SZ;
 		*sbuffer = (unsigned char *)malloc( *(slen) );
 
 		//a, B, P1, P2
-		rs = copyskip( *sbuffer, in->a, 	0, 	RS_SCSZ);
-		rs = copyskip( *sbuffer, in->pub->B, 	rs, 	RS_EPSZ);
-		rs = copyskip( *sbuffer, in->pub->P1, 	rs, 	RS_EPSZ);
-		rs = copyskip( *sbuffer, in->pub->P2, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->a, 	0, 	RS_SCSZ);
+		rs = copyskip( *sbuffer, ri->pub->B, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
 		return rs;
 	}
 
-	size_t pubserial(struct seckey *in, unsigned char **pbuffer, size_t *plen){
+	size_t pubserial(void *in, unsigned char **pbuffer, size_t *plen){
 		size_t rs;
+		struct seckey *ri = (struct seckey *)in; //recast the key
 		//set size and allocate
 		*plen = PKEY_SZ;
 		*pbuffer = (unsigned char *)malloc( *(plen) );
+		in = (struct seckey *)in; //recast the key
 
 		//B, P1, P2
-		rs = copyskip( *pbuffer, in->pub->B, 	0, 	RS_EPSZ);
-		rs = copyskip( *pbuffer, in->pub->P1, 	rs, 	RS_EPSZ);
-		rs = copyskip( *pbuffer, in->pub->P2, 	rs, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->B, 	0, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
 		return rs;
 	}
 
@@ -340,14 +350,16 @@ namespace tnc{
 	}
 
 	//destroy secret key
-	void secdestroy(struct seckey *in){
+	void secdestroy(void *in){
+		//key recast
+		struct seckey *ri = (struct seckey *)in;
 		//zero out the secret component
-		sodium_memzero(in->a, RS_SCSZ);
+		sodium_memzero(ri->a, RS_SCSZ);
 
 		//free memory
-		free(in->a);
-		pubdestroy(in->pub);
-		free(in);
+		free(ri->a);
+		pubdestroy(ri->pub);
+		free(ri);
 	}
 
 	void pubdestroy(struct pubkey *in){
@@ -374,17 +386,19 @@ namespace tnc{
 	}
 
 	//debugging use only
-	void secprint(struct seckey *in){
-		printf("a :"); ucbprint(in->a, RS_SCSZ); printf("\n");
-		printf("B :"); ucbprint(in->pub->B, RS_EPSZ); printf("\n");
-		printf("P1:"); ucbprint(in->pub->P1, RS_EPSZ); printf("\n");
-		printf("P2:"); ucbprint(in->pub->P2, RS_EPSZ); printf("\n");
+	void secprint(void *in){
+		struct seckey *ri = (struct seckey *)in;
+		printf("a :"); ucbprint(ri->a, RS_SCSZ); printf("\n");
+		printf("B :"); ucbprint(ri->pub->B, RS_EPSZ); printf("\n");
+		printf("P1:"); ucbprint(ri->pub->P1, RS_EPSZ); printf("\n");
+		printf("P2:"); ucbprint(ri->pub->P2, RS_EPSZ); printf("\n");
 	}
 
-	void pubprint(struct pubkey *in){
-		printf("B :"); ucbprint(in->B, RS_EPSZ); printf("\n");
-		printf("P1:"); ucbprint(in->P1, RS_EPSZ); printf("\n");
-		printf("P2:"); ucbprint(in->P2, RS_EPSZ); printf("\n");
+	void pubprint(void *in){
+		struct pubkey *ri = (struct pubkey *)in;
+		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
+		printf("P1:"); ucbprint(ri->P1, RS_EPSZ); printf("\n");
+		printf("P2:"); ucbprint(ri->P2, RS_EPSZ); printf("\n");
 	}
 
 	void sigprint(struct signat *in){

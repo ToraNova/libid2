@@ -1,5 +1,5 @@
 /*
- * internals/tnc25519/proto.hpp - id2 library
+ * internals/internal.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,57 +23,30 @@
  * SOFTWARE.
  */
 
-/*
- * TNCIBI protocol scheme
- *
- * ToraNova 2020
- * chia_jason96@live.com
- *
- * this is (mainly) for internal use only!
- */
+#ifndef _INTERNAL_HPP_
+#define _INTERNAL_HPP_
+struct algostr{
+	void (*randkeygen)(void **);
+	//void (*signatgen)( void *, unsigned char *, size_t );
+	//void (*signatchk)( void *, void *, unsigned char *, size_t );
 
-#ifndef _TNC25519_PROTO_HPP_
-#define _TNC25519_PROTO_HPP_
+	//void (*secserial)( void *, unsigned char **, size_t *);
+	//void (*pubserial)( void *, unsigned char **, size_t *);
+	//void (*sigserial)( void *, unsigned char **, size_t *);
+	//void (*secstruct)( unsigned char *, size_t);
+	//void (*pubstruct)( unsigned char *, size_t);
+	//void (*sigstruct)( unsigned char *, size_t);
 
-#include <stddef.h>
-#include "static.hpp"
+	//void (*secdestroy)(void *);
+	//void (*pubdestroy)(void *);
+	//void (*sigdestroy)(void *);
 
-namespace tnc25519 {
+	//void (*secprint)(void *);
+	//void (*pubprint)(void *);
+	//void (*sigprint)(void *);
 
-	namespace client{
-
-		// execute ibi protocol as client
-		// sock - the socket connection to server
-		// mbuffer, mlen - id of user/prover
-		// usk - usk struct (signature) of prover
-		int executeproto(
-			int sock,
-			unsigned char *mbuffer, size_t mlen,
-			struct signat *usk
-		);
-
-	}
-
-	namespace server{
-
-		// execute ibi protocol as server
-		// sock - the socket connection to client
-		// par - the parameter of ibi system (public key of kgc)
-		// mbuffer - the client identifying on other end (OUTPUT)
-		int executeproto(
-			int sock,
-			unsigned char *mbuffer, size_t mlen,
-			struct pubkey *par
-		);
-
-	}
-
-	// an auxiliary function to test param and usk
-	int putest(
-		struct pubkey *par,
-		struct signat *usk,
-		unsigned char *mbuffer, size_t mlen
-	);
-}
-
+	//void (*client)(int, unsigned char *, size_t, void *);
+	//void (*server)(int, unsigned char *, size_t, void *);
+	//void (*putest)(void *, void *, unsigned char *, size_t);
+};
 #endif

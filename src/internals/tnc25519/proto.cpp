@@ -1,5 +1,5 @@
 /*
- * internals/tnc/proto.cpp - id2 library
+ * internals/tnc25519/proto.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -53,7 +53,7 @@
 #include <cstdio>
 #include <cstring>
 
-namespace tnc{
+namespace tnc25519{
 
 namespace client{
 

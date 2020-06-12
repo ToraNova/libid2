@@ -55,7 +55,7 @@
 
 #include <stddef.h>
 
-namespace tnc {
+namespace tnc25519 {
 
 	struct pubkey{
 		unsigned char *B;
@@ -80,7 +80,8 @@ namespace tnc {
 
 	//randomly generate a key
 	//return a key on success, null on error
-	struct seckey *randomkey();
+	//struct seckey *randomkey();
+	void randomkey(void **);
 
 	//generate a signature based on a seckey and message
 	//key - secret key used to sign message
@@ -109,8 +110,8 @@ namespace tnc {
 	void hashfree(unsigned char *hash);
 
 	//serialize the secret,public and signature from a structure
-	size_t secserial(struct seckey *in, unsigned char **sbuffer, size_t *slen);
-	size_t pubserial(struct seckey *in, unsigned char **pbuffer, size_t *plen);
+	size_t secserial(void *in, unsigned char **sbuffer, size_t *slen);
+	size_t pubserial(void *in, unsigned char **pbuffer, size_t *plen);
 	size_t sigserial(struct signat *in, unsigned char **obuffer, size_t *olen);
 
 	//creates a public key struct from the serialize string
@@ -120,13 +121,13 @@ namespace tnc {
 	struct signat *sigstruct(unsigned char *obuffer, size_t olen);
 
 	//destroy secret,public and signature struct
-	void secdestroy(struct seckey *in);
+	void secdestroy(void *in);
 	void pubdestroy(struct pubkey *in);
 	void sigdestroy(struct signat *in);
 
 	//print out key,signature structure (debugging use)
-	void secprint(struct seckey *in);
-	void pubprint(struct pubkey *in);
+	void secprint(void *in);
+	void pubprint(void *in);
 	void sigprint(struct signat *in);
 }
 

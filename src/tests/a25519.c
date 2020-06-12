@@ -42,8 +42,7 @@ int main(int argc, char *argv[]){
 	algo = A25519_TNC;
 
 	if(argc > 1){
-		if( (strcmp(argv[1], "setup") == 0) || (strcmp(argv[1], "keygen") == 0) ){
-
+		if( (strcmp(argv[1], "setup")==0) || (strcmp(argv[1], "keygen")==0) ){
 			publicfile = fopen( str_publicfile, "w");
 			secretfile = fopen( str_secretfile, "w");
 			if( secretfile == NULL || publicfile == NULL ){
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]){
 			free(pbuf);
 			free(sbuf);
 
-		}else if( strcmp(argv[1],"ext") == 0 ){
+		}else if( (strcmp(argv[1],"ext") == 0) || strcmp(argv[1],"sign")==0 ){
 			secretfile = fopen( str_secretfile, "r");
 			idfile = fopen( str_idfile, "r");
 			if( secretfile == NULL || idfile == NULL ){
@@ -303,15 +302,15 @@ int main(int argc, char *argv[]){
 			}
 		}else{
 			//echo an error
-			lerror("Invalid mode %s, please specify either <setup|ext|prove|verify|server|client|test|runtest> !\n", argv[1]);
+			lerror("Invalid mode %s, please specify either:\n	<keygen/setup|sign/ext|check|prove|verify|server|client|test|runtest> !\n", argv[1]);
 			return 1;
 		}
 
-		printf("i25519 run OK.\n");
+		printf("a25519 run OK.\n");
 		return 0;
 	}else{
 		//echo an error
-		lerror("Insufficient args, please specify either <setup|ext|prove|verify|server|client|test|runtest> !\n");
+		lerror("Insufficient args, please specify either:\n	<keygen/setup|sign/ext|check|prove|verify|server|client|test|runtest> !\n");
 		return 1;
 	}
 
