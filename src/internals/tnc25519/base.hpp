@@ -1,5 +1,5 @@
 /*
- * Main include file - id2 library
+ * internals/tnc25519/base.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,28 +23,17 @@
  * SOFTWARE.
  */
 
-#ifndef _ID2_H_
-#define _ID2_H_
+#ifndef _TNC25519_BASE_HPP_
+#define _TNC25519_BASE_HPP_
 
-#include "a25519.h"
+#include "../internal.hpp"
+#include "static.hpp"
+#include "proto.hpp"
 
-//TODO please keep this updated
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2	//TODO: not implemented
-#define A25519_TWINSCHNORR	3	//TODO: not implemented
-#define A25519_TIGHTSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
-
-//TODO c bindings for internals
-// Or do we really need it?
-
-//auxiliary helpers
-#include "utils/debug.h"
-#include "utils/jbase64.h"
-#include "utils/futil.h"
-#include "utils/asn1util.h"
-
+namespace tnc25519{
+	const struct algostr ftable = {
+		&randomkey
+	};
+}
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Main include file - id2 library
+ * <TEMPLATE> - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,28 +23,56 @@
  * SOFTWARE.
  */
 
-#ifndef _ID2_H_
-#define _ID2_H_
+/*
+ * <TEMPLATE> protocol scheme
+ *
+ * ToraNova 2020
+ * chia_jason96@live.com
+ *
+ * this is (mainly) for internal use only!
+ */
 
-#include "a25519.h"
+#define _<TEMPLATE>_PROTO_HPP_
 
-//TODO please keep this updated
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2	//TODO: not implemented
-#define A25519_TWINSCHNORR	3	//TODO: not implemented
-#define A25519_TIGHTSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
+#include <stddef.h>
+#include "static.hpp"
 
-//TODO c bindings for internals
-// Or do we really need it?
+namespace <TEMPLATE> {
 
-//auxiliary helpers
-#include "utils/debug.h"
-#include "utils/jbase64.h"
-#include "utils/futil.h"
-#include "utils/asn1util.h"
+	namespace client{
 
+		// execute ibi protocol as client
+		// sock - the socket connection to server
+		// mbuffer, mlen - id of user/prover
+		// usk - usk struct (signature) of prover
+		int executeproto(
+			int sock,
+			unsigned char *mbuffer, size_t mlen,
+			struct signat *usk
+		);
+
+	}
+
+	namespace server{
+
+		// execute ibi protocol as server
+		// sock - the socket connection to client
+		// par - the parameter of ibi system (public key of kgc)
+		// mbuffer - the client identifying on other end (OUTPUT)
+		int executeproto(
+			int sock,
+			unsigned char *mbuffer, size_t mlen,
+			struct pubkey *par
+		);
+
+	}
+
+	// an auxiliary function to test param and usk
+	int putest(
+		struct pubkey *par,
+		struct signat *usk,
+		unsigned char *mbuffer, size_t mlen
+	);
+}
 
 #endif

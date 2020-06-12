@@ -23,22 +23,14 @@
  * SOFTWARE.
  */
 
-#ifndef _ID2_H_
-#define _ID2_H_
+#ifndef _ID2_HPP_
+#define _ID2_HPP_
+#include "a25519.hpp"
 
-#include "a25519.h"
-
-//TODO please keep this updated
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2	//TODO: not implemented
-#define A25519_TWINSCHNORR	3	//TODO: not implemented
-#define A25519_TIGHTSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
-
-//TODO c bindings for internals
-// Or do we really need it?
+//internals
+#include "internals/proto.hpp"
+#include "internals/tnc/static.hpp"
+#include "internals/tnc/proto.hpp"
 
 //auxiliary helpers
 #include "utils/debug.h"
@@ -46,5 +38,6 @@
 #include "utils/futil.h"
 #include "utils/asn1util.h"
 
+#include "internals/internals.h"
 
 #endif

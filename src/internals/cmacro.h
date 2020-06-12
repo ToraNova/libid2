@@ -1,5 +1,5 @@
 /*
- * Main include file - id2 library
+ * internals/cmacro.h - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,28 +23,33 @@
  * SOFTWARE.
  */
 
-#ifndef _ID2_H_
-#define _ID2_H_
+/*
+ * Constants and macro file
+ * stores all defines here
+ *
+ * PLEASE DO NOT STORE CONFIGURATION MACROS, use autotools for that instead!
+ *
+ * ToraNova 2020
+ * chia_jason96@live.com
+ */
 
-#include "a25519.h"
+#ifndef _CMACRO_H_
+#define _CMACRO_H_
 
-//TODO please keep this updated
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2	//TODO: not implemented
-#define A25519_TWINSCHNORR	3	//TODO: not implemented
-#define A25519_TIGHTSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
+// SIZES
+// Ristretto255
+#define RS_EPSZ crypto_core_ristretto255_BYTES
+#define RS_SCSZ crypto_core_ristretto255_SCALARBYTES
+#define RS_HSSZ crypto_core_ristretto255_HASHBYTES
 
-//TODO c bindings for internals
-// Or do we really need it?
+// TCP socket
+#define TS_MAXSZ 1024
 
-//auxiliary helpers
-#include "utils/debug.h"
-#include "utils/jbase64.h"
-#include "utils/futil.h"
-#include "utils/asn1util.h"
+// SIGNALS
+//go-ahead
+#define SIG_GA 0x5a
+
 
 
 #endif
+

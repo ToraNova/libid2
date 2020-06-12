@@ -1,5 +1,5 @@
 /*
- * Main include file - id2 library
+ * internals/proto.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,28 +23,32 @@
  * SOFTWARE.
  */
 
-#ifndef _ID2_H_
-#define _ID2_H_
+/*
+ * Generic protocols (ID negotiation, send OK or NACK)
+ *
+ * id2 project
+ * chia_jason96@live.com
+ */
 
-#include "a25519.h"
+#ifndef _GEN_PROTO_HPP_
+#define _GEN_PROTO_HPP_
 
-//TODO please keep this updated
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2	//TODO: not implemented
-#define A25519_TWINSCHNORR	3	//TODO: not implemented
-#define A25519_TIGHTSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
+#include <stddef.h>
+namespace general{
 
-//TODO c bindings for internals
-// Or do we really need it?
+namespace client{
+	//establish a protocol by sending ID over as client
+	//return 0 on succeed, abort protocol otherwise
+	int establish(int sock, unsigned char *mbuffer, size_t mlen);
 
-//auxiliary helpers
-#include "utils/debug.h"
-#include "utils/jbase64.h"
-#include "utils/futil.h"
-#include "utils/asn1util.h"
+}
 
+namespace server{
+	//establish a protocol by receiving ID over as server
+	//return 0 on succeed, abort protocol otherwise
+	int establish(int sock, unsigned char **mbuffer, size_t *mlen);
+}
+
+}
 
 #endif

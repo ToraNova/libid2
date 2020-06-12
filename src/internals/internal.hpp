@@ -1,5 +1,5 @@
 /*
- * Main include file - id2 library
+ * internals/internal.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,28 +23,30 @@
  * SOFTWARE.
  */
 
-#ifndef _ID2_H_
-#define _ID2_H_
+#ifndef _INTERNAL_HPP_
+#define _INTERNAL_HPP_
+struct algostr{
+	void (*randkeygen)(void **);
+	//void (*signatgen)( void *, unsigned char *, size_t );
+	//void (*signatchk)( void *, void *, unsigned char *, size_t );
 
-#include "a25519.h"
+	//void (*secserial)( void *, unsigned char **, size_t *);
+	//void (*pubserial)( void *, unsigned char **, size_t *);
+	//void (*sigserial)( void *, unsigned char **, size_t *);
+	//void (*secstruct)( unsigned char *, size_t);
+	//void (*pubstruct)( unsigned char *, size_t);
+	//void (*sigstruct)( unsigned char *, size_t);
 
-//TODO please keep this updated
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2	//TODO: not implemented
-#define A25519_TWINSCHNORR	3	//TODO: not implemented
-#define A25519_TIGHTSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
+	//void (*secdestroy)(void *);
+	//void (*pubdestroy)(void *);
+	//void (*sigdestroy)(void *);
 
-//TODO c bindings for internals
-// Or do we really need it?
+	//void (*secprint)(void *);
+	//void (*pubprint)(void *);
+	//void (*sigprint)(void *);
 
-//auxiliary helpers
-#include "utils/debug.h"
-#include "utils/jbase64.h"
-#include "utils/futil.h"
-#include "utils/asn1util.h"
-
-
+	//void (*client)(int, unsigned char *, size_t, void *);
+	//void (*server)(int, unsigned char *, size_t, void *);
+	//void (*putest)(void *, void *, unsigned char *, size_t);
+};
 #endif

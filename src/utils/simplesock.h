@@ -17,10 +17,6 @@ extern "C"{
 #include <unistd.h>
 
 #define SEND_BATCH_SIZE 1024
-#define CONN_MAXBF_SIZE 1024
-
-// the following is used as a go-ahead byte
-#define CONN_ACK 0x5a
 
 //creates a socket connection timeout_sec to set send and receive timeout for that socket
 //set timeout_sec to 0 for notimeout. reuse - allow quick rebinding of socket
