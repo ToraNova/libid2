@@ -39,10 +39,10 @@ int main(int argc, char *argv[]){
 	clock_t start, end;
 	unsigned int i;
 	double cpu_time_use0, cpu_time_use1, cpu_time_use2;
-	algo = A25519_TNC;
 
-	if(argc > 1){
-		if( (strcmp(argv[1], "setup")==0) || (strcmp(argv[1], "keygen")==0) ){
+	if(argc > 2){
+		algo = strtol(argv[1],NULL,10);
+		if( (strcmp(argv[2], "setup")==0) || (strcmp(argv[2], "keygen")==0) ){
 			publicfile = fopen( str_publicfile, "w");
 			secretfile = fopen( str_secretfile, "w");
 			if( secretfile == NULL || publicfile == NULL ){
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
 			free(pbuf);
 			free(sbuf);
 
-		}else if( (strcmp(argv[1],"ext") == 0) || strcmp(argv[1],"sign")==0 ){
+		}else if( (strcmp(argv[2],"ext") == 0) || strcmp(argv[2],"sign")==0 ){
 			secretfile = fopen( str_secretfile, "r");
 			idfile = fopen( str_idfile, "r");
 			if( secretfile == NULL || idfile == NULL ){
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]){
 			free(sbuf);
 			free(mbuf);
 			free(obuf);
-		}else if(strcmp( argv[1],"check") == 0){
+		}else if(strcmp( argv[2],"check") == 0){
 
 			publicfile = fopen( str_publicfile, "r");
 			idfile = fopen( str_idfile, "r");
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]){
 			free(obuf);
 			free(mbuf);
 
-		}else if( strcmp(argv[1],"test") == 0){
+		}else if( strcmp(argv[2],"test") == 0){
 			publicfile = fopen( str_publicfile, "r");
 			idfile = fopen( str_idfile, "r");
 			uskfile = fopen( str_uskfile, "r");
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]){
 			free(obuf);
 			free(mbuf);
 
-		}else if( strcmp(argv[1],"prove") == 0){
+		}else if( strcmp(argv[2],"prove") == 0){
 			idfile = fopen( str_idfile, "r");
 			uskfile = fopen( str_uskfile, "r");
 			if( idfile == NULL || uskfile == NULL ){
@@ -164,8 +164,8 @@ int main(int argc, char *argv[]){
 			obuf = read_b64( uskfile, &olen );
 			mbuf = (unsigned char *) fileread( idfile, &mlen );
 
-			if( argc > 2 ){
-				rc = a25519_ibi_oclient(algo, mbuf, mlen, obuf, olen, argv[2], PORT, 60);
+			if( argc > 3 ){
+				rc = a25519_ibi_oclient(algo, mbuf, mlen, obuf, olen, argv[3], PORT, 60);
 			}else{
 				rc = a25519_ibi_oclient(algo, mbuf, mlen, obuf, olen, "127.0.0.1", PORT, 60);
 			}
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]){
 			free(obuf);
 			free(mbuf);
 
-		}else if( strcmp(argv[1],"verify") == 0){
+		}else if( strcmp(argv[2],"verify") == 0){
 			//ONE shot verify
 			publicfile = fopen( str_publicfile, "r");
 			if( publicfile == NULL ){
@@ -200,7 +200,7 @@ int main(int argc, char *argv[]){
 			free(pbuf);
 			free(mbuf);
 
-		}else if( strcmp(argv[1],"client") == 0){
+		}else if( strcmp(argv[2],"client") == 0){
 
 			idfile = fopen( str_idfile, "r");
 			uskfile = fopen( str_uskfile, "r");
@@ -212,8 +212,8 @@ int main(int argc, char *argv[]){
 			mbuf = (unsigned char *) fileread( idfile, &mlen );
 			int csock;
 
-			if( argc > 2 ){
-				csock = a25519_ibi_client(algo, mbuf, mlen, obuf, olen, argv[2], PORT, 60);
+			if( argc > 3 ){
+				csock = a25519_ibi_client(algo, mbuf, mlen, obuf, olen, argv[3], PORT, 60);
 			}else{
 				csock = a25519_ibi_client(algo, mbuf, mlen, obuf, olen, "127.0.0.1", PORT, 60);
 			}
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]){
 			free(obuf);
 			free(mbuf);
 
-		}else if( strcmp(argv[1],"server") == 0 ){
+		}else if( strcmp(argv[2],"server") == 0 ){
 			//persistent verify
 			publicfile = fopen( str_publicfile, "r");
 			if( publicfile == NULL ){
@@ -244,8 +244,8 @@ int main(int argc, char *argv[]){
 			a25519_ibi_server(algo, pbuf, plen, PORT, 10, 5,sample_callback);
 			//don't expect to leave this place
 
-		}else if( strcmp(argv[1],"runtest") == 0 ){
-			if(argc > 2){
+		}else if( strcmp(argv[2],"runtest") == 0 ){
+			if(argc > 3){
 				publicfile = fopen( str_publicfile, "r");
 				idfile = fopen( str_idfile, "r");
 				uskfile = fopen( str_uskfile, "r");
@@ -254,16 +254,16 @@ int main(int argc, char *argv[]){
 				mbuf = (unsigned char *) fileread( idfile, &mlen );
 				unsigned int count = int_testcnt;
 
-				if( strcmp(argv[2],"prove") == 0 ){
-					if(argc > 3){
-						a25519_test_client(algo, mbuf, mlen, obuf, olen, argv[3], PORT, count );
+				if( strcmp(argv[3],"prove") == 0 ){
+					if(argc > 4){
+						a25519_test_client(algo, mbuf, mlen, obuf, olen, argv[4], PORT, count );
 					}else{
 						a25519_test_client(algo, mbuf, mlen, obuf, olen, "127.0.0.1", PORT, count );
 					}
-				}else if( strcmp(argv[2],"verify") == 0){
+				}else if( strcmp(argv[3],"verify") == 0){
 					//verifies for 100 times
 					a25519_test_server(algo, pbuf, plen, PORT, count );
-				}else if( strcmp(argv[2],"signat") == 0){
+				}else if( strcmp(argv[3],"signat") == 0){
 					unsigned char mbuf[] = str_teststr;
 
 					start = clock();
@@ -302,7 +302,7 @@ int main(int argc, char *argv[]){
 			}
 		}else{
 			//echo an error
-			lerror("Invalid mode %s, please specify either:\n	<keygen/setup|sign/ext|check|prove|verify|server|client|test|runtest> !\n", argv[1]);
+			lerror("Invalid mode %s, please specify either:\n	<keygen/setup|sign/ext|check|prove|verify|server|client|test|runtest> !\n", argv[2]);
 			return 1;
 		}
 
@@ -310,7 +310,7 @@ int main(int argc, char *argv[]){
 		return 0;
 	}else{
 		//echo an error
-		lerror("Insufficient args, please specify either:\n	<keygen/setup|sign/ext|check|prove|verify|server|client|test|runtest> !\n");
+		lerror("Insufficient args, please specify either:\n<mode>\t<keygen/setup|sign/ext|check|prove|verify|server|client|test|runtest> !\n\nmodes:\n0 - tnc25519\n1 - cli25519\n2 - sch25519\n");
 		return 1;
 	}
 

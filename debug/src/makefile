@@ -138,7 +138,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libid2_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libid2_la_OBJECTS = internals/proto.lo internals/tnc25519/static.lo \
-	internals/tnc25519/proto.lo a25519.lo a25519.c.lo \
+	internals/tnc25519/proto.lo internals/sch25519/static.lo \
+	internals/sch25519/proto.lo a25519.lo a25519.c.lo \
 	utils/simplesock.lo utils/jbase64.lo utils/asn1util.lo \
 	utils/futil.lo utils/bufhelp.lo
 libid2_la_OBJECTS = $(am_libid2_la_OBJECTS)
@@ -169,6 +170,8 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/a25519.Plo ./$(DEPDIR)/a25519.c.Plo \
 	internals/$(DEPDIR)/proto.Plo \
+	internals/sch25519/$(DEPDIR)/proto.Plo \
+	internals/sch25519/$(DEPDIR)/static.Plo \
 	internals/tnc25519/$(DEPDIR)/proto.Plo \
 	internals/tnc25519/$(DEPDIR)/static.Plo \
 	tests/$(DEPDIR)/a25519.Po utils/$(DEPDIR)/asn1util.Plo \
@@ -367,6 +370,7 @@ top_srcdir = ../..
 lib_LTLIBRARIES = libid2.la
 libid2_la_SOURCES = internals/proto.cpp \
 		internals/tnc25519/static.cpp internals/tnc25519/proto.cpp \
+		internals/sch25519/static.cpp internals/sch25519/proto.cpp \
 		a25519.cpp a25519.c.cpp \
 		utils/simplesock.c utils/jbase64.c utils/asn1util.c \
 		utils/futil.c utils/bufhelp.c
@@ -472,6 +476,16 @@ internals/tnc25519/static.lo: internals/tnc25519/$(am__dirstamp) \
 	internals/tnc25519/$(DEPDIR)/$(am__dirstamp)
 internals/tnc25519/proto.lo: internals/tnc25519/$(am__dirstamp) \
 	internals/tnc25519/$(DEPDIR)/$(am__dirstamp)
+internals/sch25519/$(am__dirstamp):
+	@$(MKDIR_P) internals/sch25519
+	@: > internals/sch25519/$(am__dirstamp)
+internals/sch25519/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) internals/sch25519/$(DEPDIR)
+	@: > internals/sch25519/$(DEPDIR)/$(am__dirstamp)
+internals/sch25519/static.lo: internals/sch25519/$(am__dirstamp) \
+	internals/sch25519/$(DEPDIR)/$(am__dirstamp)
+internals/sch25519/proto.lo: internals/sch25519/$(am__dirstamp) \
+	internals/sch25519/$(DEPDIR)/$(am__dirstamp)
 utils/$(am__dirstamp):
 	@$(MKDIR_P) utils
 	@: > utils/$(am__dirstamp)
@@ -507,6 +521,8 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f internals/*.$(OBJEXT)
 	-rm -f internals/*.lo
+	-rm -f internals/sch25519/*.$(OBJEXT)
+	-rm -f internals/sch25519/*.lo
 	-rm -f internals/tnc25519/*.$(OBJEXT)
 	-rm -f internals/tnc25519/*.lo
 	-rm -f tests/*.$(OBJEXT)
@@ -519,6 +535,8 @@ distclean-compile:
 include ./$(DEPDIR)/a25519.Plo # am--include-marker
 include ./$(DEPDIR)/a25519.c.Plo # am--include-marker
 include internals/$(DEPDIR)/proto.Plo # am--include-marker
+include internals/sch25519/$(DEPDIR)/proto.Plo # am--include-marker
+include internals/sch25519/$(DEPDIR)/static.Plo # am--include-marker
 include internals/tnc25519/$(DEPDIR)/proto.Plo # am--include-marker
 include internals/tnc25519/$(DEPDIR)/static.Plo # am--include-marker
 include tests/$(DEPDIR)/a25519.Po # am--include-marker
@@ -588,6 +606,7 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf internals/.libs internals/_libs
+	-rm -rf internals/sch25519/.libs internals/sch25519/_libs
 	-rm -rf internals/tnc25519/.libs internals/tnc25519/_libs
 	-rm -rf utils/.libs utils/_libs
 install-includeHEADERS: $(include_HEADERS)
@@ -732,6 +751,8 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f internals/$(DEPDIR)/$(am__dirstamp)
 	-rm -f internals/$(am__dirstamp)
+	-rm -f internals/sch25519/$(DEPDIR)/$(am__dirstamp)
+	-rm -f internals/sch25519/$(am__dirstamp)
 	-rm -f internals/tnc25519/$(DEPDIR)/$(am__dirstamp)
 	-rm -f internals/tnc25519/$(am__dirstamp)
 	-rm -f tests/$(DEPDIR)/$(am__dirstamp)
@@ -751,6 +772,8 @@ distclean: distclean-am
 		-rm -f ./$(DEPDIR)/a25519.Plo
 	-rm -f ./$(DEPDIR)/a25519.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
+	-rm -f internals/sch25519/$(DEPDIR)/proto.Plo
+	-rm -f internals/sch25519/$(DEPDIR)/static.Plo
 	-rm -f internals/tnc25519/$(DEPDIR)/proto.Plo
 	-rm -f internals/tnc25519/$(DEPDIR)/static.Plo
 	-rm -f tests/$(DEPDIR)/a25519.Po
@@ -807,6 +830,8 @@ maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/a25519.Plo
 	-rm -f ./$(DEPDIR)/a25519.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
+	-rm -f internals/sch25519/$(DEPDIR)/proto.Plo
+	-rm -f internals/sch25519/$(DEPDIR)/static.Plo
 	-rm -f internals/tnc25519/$(DEPDIR)/proto.Plo
 	-rm -f internals/tnc25519/$(DEPDIR)/static.Plo
 	-rm -f tests/$(DEPDIR)/a25519.Po

@@ -1,5 +1,5 @@
 /*
- * internals/<TEMPLATE>/static.cpp - id2 library
+ * internals/sch25519/static.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,8 @@
  */
 
 /*
- * TODO: please edit description
+ * Schnorr Identity based identification based on Schnorr signatures
+ * on Curve25519 using NaCL
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -65,7 +66,7 @@
  *
  */
 
-namespace <TEMPLATE>{
+namespace sch25519{
 
 	void randomkey(void **out){
 		//declare and allocate memory for key
@@ -73,6 +74,25 @@ namespace <TEMPLATE>{
 		tmp = (struct seckey *)malloc( sizeof(struct seckey) );
 		//allocate memory for pubkey
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
+		unsigned char neg[RS_SCSZ];
+
+		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
+
+		//sample a and B
+		crypto_core_ristretto255_scalar_random( tmp->a );
+		crypto_core_ristretto255_random( tmp->pub->B );
+
+		crypto_core_ristretto255_scalar_negate(neg , tmp->a);
+		rc = crypto_scalarmult_ristretto255(
+				tmp->pub->P1,
+				neg,
+				tmp->pub->B
+				); // P1 = aB
+		if( rc != 0 ){ //abort if fail
+			*out = NULL; return;
+		}
 
 		//recast and return
 		*out = (void *) tmp; return;
@@ -89,6 +109,37 @@ namespace <TEMPLATE>{
 		//declare and allocate for signature struct
 		tmp = (struct signat *)malloc( sizeof( struct signat) );
 
+		//--------------------------TODO START
+		//nonce, r and hash
+		unsigned char nonce[RS_SCSZ];
+
+		//allocate for components
+		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->U = (unsigned char *)malloc( RS_EPSZ );
+		tmp->B = (unsigned char *)malloc( RS_EPSZ );
+
+		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
+		crypto_core_ristretto255_scalar_random(nonce);
+
+		rc = crypto_scalarmult_ristretto255(
+				tmp->U,
+				nonce,
+				key->pub->B
+				); // U = rB
+		if( rc != 0 ){ //abort if fail
+			*out = NULL; return;
+		}
+
+		//store B on the signature
+		memcpy( tmp->B, key->pub->B, RS_EPSZ );
+
+		tmp->x = hashexec(mbuffer, mlen, tmp->U, key->pub->P1);
+
+		// s = r + xa
+		crypto_core_ristretto255_scalar_mul( tmp->s , tmp->x, key->a );
+		crypto_core_ristretto255_scalar_add( tmp->s, tmp->s, nonce );
+		//--------------------------TODO END
+
 		*out = (void *) tmp; return;
 	}
 
@@ -102,8 +153,43 @@ namespace <TEMPLATE>{
 		struct pubkey *par = (struct pubkey *)vpar;
 		struct signat *sig = (struct signat *)vsig;
 
+		//--------------------------TODO START
+		unsigned char tmp1[RS_EPSZ]; //tmp array
+		unsigned char tmp2[RS_EPSZ]; //tmp array
+
+		// U' = sB - xP1
+		rc = crypto_scalarmult_ristretto255(
+				tmp1,
+				sig->s,
+				par->B
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_scalarmult_ristretto255(
+				tmp2,
+				sig->x,
+				par->P1
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_core_ristretto255_add( tmp1, tmp1, tmp2 ); //tmp3 U'
+		if( rc != 0 ) return rc; //abort if fail
+
+		xp = hashexec(mbuffer, mlen, tmp1, par->P1);
+
+		//check if tmp is equal to x from obuffer
+		rc = crypto_verify_32( xp, sig->x );
+
+#ifdef DEBUG
+pubprint(par);
+sigprint(sig);
+printf("x':"); ucbprint(xp, RS_SCSZ); printf("\n");
+printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
+#endif
+
+		//--------------------------TODO END
+
+		//free any allocated stuff
 		hashfree(xp);
-		return 0;
+		return rc;
 	}
 
 	unsigned char *hashexec(
@@ -143,7 +229,6 @@ namespace <TEMPLATE>{
 		rs = copyskip( *sbuffer, ri->a, 	0, 	RS_SCSZ);
 		rs = copyskip( *sbuffer, ri->pub->B, 	rs, 	RS_EPSZ);
 		rs = copyskip( *sbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
-		rs = copyskip( *sbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
 
 		return rs;
 	}
@@ -158,7 +243,6 @@ namespace <TEMPLATE>{
 		//B, P1, P2
 		rs = copyskip( *pbuffer, ri->pub->B, 	0, 	RS_EPSZ);
 		rs = copyskip( *pbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
-		rs = copyskip( *pbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
 
 		return rs;
 	}
@@ -174,7 +258,6 @@ namespace <TEMPLATE>{
 		rs = copyskip( *obuffer, ri->s, 	0, 	RS_SCSZ);
 		rs = copyskip( *obuffer, ri->x, 	rs, 	RS_SCSZ);
 		rs = copyskip( *obuffer, ri->U, 	rs, 	RS_EPSZ);
-		rs = copyskip( *obuffer, ri->V, 	rs, 	RS_EPSZ);
 		rs = copyskip( *obuffer, ri->B, 	rs, 	RS_EPSZ);
 
 		return rs;
@@ -191,12 +274,10 @@ namespace <TEMPLATE>{
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
 		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
-		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->a,		sbuffer, 0, 	RS_SCSZ);
 		rs = skipcopy( tmp->pub->B,	sbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->pub->P1,	sbuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( tmp->pub->P2,	sbuffer, rs, 	RS_EPSZ);
 
 		*out = (void *) tmp; return;
 	}
@@ -210,11 +291,9 @@ namespace <TEMPLATE>{
 		//allocate memory for the elements
 		tmp->B = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P1 = (unsigned char *)malloc( RS_EPSZ );
-		tmp->P2 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->B,		pbuffer, 0, 	RS_EPSZ);
 		rs = skipcopy( tmp->P1,		pbuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( tmp->P2,		pbuffer, rs, 	RS_EPSZ);
 
 		*out = (void *) tmp; return;
 	}
@@ -228,13 +307,11 @@ namespace <TEMPLATE>{
 		tmp->s = (unsigned char *)malloc( RS_SCSZ );
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
-		tmp->V = (unsigned char *)malloc( RS_EPSZ );
 		tmp->B = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->s,		obuffer, 0, 	RS_SCSZ);
 		rs = skipcopy( tmp->x,		obuffer, rs, 	RS_SCSZ);
 		rs = skipcopy( tmp->U,		obuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( tmp->V,		obuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->B,		obuffer, rs, 	RS_EPSZ);
 
 		*out = (void *) tmp; return;
@@ -259,7 +336,6 @@ namespace <TEMPLATE>{
 		//free up memory
 		free(ri->B);
 		free(ri->P1);
-		free(ri->P2);
 		free(ri); return;
 	}
 
@@ -270,12 +346,10 @@ namespace <TEMPLATE>{
 		sodium_memzero(ri->s, RS_SCSZ);
 		sodium_memzero(ri->x, RS_SCSZ);
 		sodium_memzero(ri->U, RS_EPSZ);
-		sodium_memzero(ri->V, RS_EPSZ);
 		//free memory
 		free(ri->s);
 		free(ri->x);
 		free(ri->U);
-		free(ri->V);
 		free(ri->B);
 		free(ri); return;
 	}
@@ -286,7 +360,6 @@ namespace <TEMPLATE>{
 		printf("a :"); ucbprint(ri->a, RS_SCSZ); printf("\n");
 		printf("B :"); ucbprint(ri->pub->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->pub->P1, RS_EPSZ); printf("\n");
-		printf("P2:"); ucbprint(ri->pub->P2, RS_EPSZ); printf("\n");
 		return;
 	}
 
@@ -294,7 +367,6 @@ namespace <TEMPLATE>{
 		struct pubkey *ri = (struct pubkey *)in;
 		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->P1, RS_EPSZ); printf("\n");
-		printf("P2:"); ucbprint(ri->P2, RS_EPSZ); printf("\n");
 		return;
 	}
 
@@ -303,7 +375,6 @@ namespace <TEMPLATE>{
 		printf("s :"); ucbprint(ri->s, RS_SCSZ); printf("\n");
 		printf("x :"); ucbprint(ri->x, RS_SCSZ); printf("\n");
 		printf("U :"); ucbprint(ri->U, RS_EPSZ); printf("\n");
-		printf("V :"); ucbprint(ri->V, RS_EPSZ); printf("\n");
 		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
 		return;
 	}

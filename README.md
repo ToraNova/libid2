@@ -27,10 +27,16 @@ OR
 ```
 
 ### Supported IBI Schemes
-The deprecated version of the library found under the deprecate directory supports 3 schemes. This renewed version currently only supports 1.
-1. TNC-Schnorr IBI (using Ristretto Curve25519)
-2. CLI (Certificateless Identification, using Ristretto Curve25519)
+The deprecated version of the library found under the deprecate directory supports 3 schemes. This renewed version currently only supports 2.
+
+#### Using Ristretto Curve25519
+	1. TNC-Schnorr IBI
+	2. CLI (Certificateless Identification)
+	3. Schnorr IBI
 
 ### Supported Signature Schemes
 Likewise, the deprecated version supports 3 schemes while the renewed currently only supports 1.
-2. TNC-Schnorr signatures (using Ristretto over Curve25519)
+
+#### Using Ristretto Curve25519
+	1. TNC-Schnorr
+	2. Schnorr

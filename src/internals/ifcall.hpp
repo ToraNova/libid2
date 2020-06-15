@@ -27,9 +27,12 @@
 #define _IFCALL_HPP_
 
 #include "tnc25519/base.hpp"
+#include "sch25519/base.hpp"
 
-const struct algostr *iftable[1] = {
-	&tnc25519::ftable
+const struct algostr *iftable[10] = {
+	&tnc25519::ftable,
+	NULL,
+	&sch25519::ftable,
 };
 
 #define A25519_TNC 		0

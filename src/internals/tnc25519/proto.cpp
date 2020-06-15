@@ -167,13 +167,13 @@ namespace tnc25519{
 		xp = hashexec(mbuffer, mlen, buf, (buf+RS_EPSZ) );
 
 #ifdef DEBUG
-	pubprint(par);
-	printf("U :"); ucbprint( buf, RS_EPSZ ); printf("\n");
-	printf("V :"); ucbprint( buf+RS_EPSZ, RS_EPSZ ); printf("\n");
-	printf("T :"); ucbprint( buf, RS_EPSZ ); printf("\n");
-	printf("c :"); ucbprint( c, RS_SCSZ ); printf("\n");
-	printf("y :"); ucbprint( y, RS_SCSZ ); printf("\n");
-	printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
+pubprint(par);
+printf("U :"); ucbprint( buf, RS_EPSZ ); printf("\n");
+printf("V :"); ucbprint( buf+RS_EPSZ, RS_EPSZ ); printf("\n");
+printf("T :"); ucbprint( buf+RS_EPSZ*2, RS_EPSZ ); printf("\n");
+printf("c :"); ucbprint( c, RS_SCSZ ); printf("\n");
+printf("y :"); ucbprint( y, RS_SCSZ ); printf("\n");
+printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 #endif
 
 		// yB = T + c( U' - xP1 )

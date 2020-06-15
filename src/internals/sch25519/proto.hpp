@@ -1,5 +1,5 @@
 /*
- * internals/<TEMPLATE>/proto.hpp - id2 library
+ * internals/sch25519/proto.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -32,13 +32,13 @@
  * this is (mainly) for internal use only!
  */
 
-#ifndef _<TEMPLATE>_PROTO_HPP_
-#define _<TEMPLATE>_PROTO_HPP_
+#ifndef _SCH25519_PROTO_HPP_
+#define _SCH25519_PROTO_HPP_
 
 #include <stddef.h>
 #include "static.hpp"
 
-namespace <TEMPLATE> {
+namespace sch25519 {
 
 	//prove existence of usk without revealing
 	int signatprv(

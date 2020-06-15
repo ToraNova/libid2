@@ -74,6 +74,33 @@ namespace <TEMPLATE>{
 		//allocate memory for pubkey
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
+		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
+
+		//sample a and B
+		crypto_core_ristretto255_scalar_random( tmp->a );
+		crypto_core_ristretto255_random( tmp->pub->B );
+
+		rc = crypto_scalarmult_ristretto255(
+				tmp->pub->P1,
+				tmp->a,
+				tmp->pub->B
+				); // P1 = aB
+		if( rc != 0 ){ //abort if fail
+			*out = NULL; return;
+		}
+
+		rc = crypto_scalarmult_ristretto255(
+				tmp->pub->P2,
+				tmp->a,
+				tmp->pub->P1
+				); // P2 = aP1
+		if( rc != 0 ){ //abort if fail
+			*out = NULL; return;
+		}
+
 		//recast and return
 		*out = (void *) tmp; return;
 	}
@@ -89,6 +116,48 @@ namespace <TEMPLATE>{
 		//declare and allocate for signature struct
 		tmp = (struct signat *)malloc( sizeof( struct signat) );
 
+		//--------------------------TODO START
+		//nonce, r and hash
+		unsigned char nonce[RS_SCSZ];
+
+		//allocate for components
+		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		//tmp->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
+		tmp->U = (unsigned char *)malloc( RS_EPSZ );
+		tmp->V = (unsigned char *)malloc( RS_EPSZ );
+		tmp->B = (unsigned char *)malloc( RS_EPSZ );
+
+		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
+		crypto_core_ristretto255_scalar_random(nonce);
+
+		rc = crypto_scalarmult_ristretto255(
+				tmp->U,
+				nonce,
+				key->pub->B
+				); // U = rB
+		if( rc != 0 ){ //abort if fail
+			*out = NULL; return;
+		}
+
+		rc = crypto_scalarmult_ristretto255(
+				tmp->V,
+				nonce,
+				key->pub->P1
+				); // V = rP1
+		if( rc != 0 ){ //abort if fail
+			*out = NULL; return;
+		}
+
+		//store B on the signature
+		memcpy( tmp->B, key->pub->B, RS_EPSZ );
+
+		tmp->x = hashexec(mbuffer, mlen, tmp->U, tmp->V);
+
+		// s = r + xa
+		crypto_core_ristretto255_scalar_mul( tmp->s , tmp->x, key->a );
+		crypto_core_ristretto255_scalar_add( tmp->s, tmp->s, nonce );
+		//--------------------------TODO END
+
 		*out = (void *) tmp; return;
 	}
 
@@ -102,8 +171,61 @@ namespace <TEMPLATE>{
 		struct pubkey *par = (struct pubkey *)vpar;
 		struct signat *sig = (struct signat *)vsig;
 
+		//--------------------------TODO START
+		unsigned char tmp1[RS_EPSZ]; //tmp array
+		unsigned char tmp2[RS_EPSZ]; //tmp array
+		unsigned char tmp3[RS_EPSZ]; //tmp array
+		unsigned char *xp;
+
+		// U' = sB - xP1
+		rc = crypto_scalarmult_ristretto255(
+				tmp1,
+				sig->s,
+				par->B
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_scalarmult_ristretto255(
+				tmp2,
+				sig->x,
+				par->P1
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_core_ristretto255_sub( tmp3, tmp1, tmp2 ); //tmp3 U'
+		if( rc != 0 ) return rc; //abort if fail
+
+		// V' = sP1 - xP2
+		rc = crypto_scalarmult_ristretto255(
+				tmp1,
+				sig->s,
+				par->P1
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_scalarmult_ristretto255(
+				tmp2,
+				sig->x,
+				par->P2
+				);
+		if( rc != 0 ) return rc; //abort if fail
+		rc = crypto_core_ristretto255_sub( tmp2, tmp1, tmp2 ); //tmp4 V'
+		if( rc != 0 ) return rc; //abort if fail
+
+		xp = hashexec(mbuffer, mlen, tmp3, tmp2);
+
+		//check if tmp is equal to x from obuffer
+		rc = crypto_verify_32( xp, sig->x );
+
+#ifdef DEBUG
+		pubprint(par);
+		sigprint(sig);
+		printf("x':"); ucbprint(xp, RS_SCSZ); printf("\n");
+		printf("U':"); ucbprint(tmp3, RS_EPSZ); printf("\n");
+		printf("V':"); ucbprint(tmp2, RS_EPSZ); printf("\n");
+#endif
+		//--------------------------TODO END
+
+		//free any allocated stuff
 		hashfree(xp);
-		return 0;
+		return rc;
 	}
 
 	unsigned char *hashexec(

@@ -1,5 +1,5 @@
 /*
- * internals/<TEMPLATE>/static.hpp - id2 library
+ * internals/sch25519/static.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -32,14 +32,14 @@
  * this is for internal use only!
  */
 
-#ifndef _<TEMPLATE>_STATIC_HPP_
-#define _<TEMPLATE>_STATIC_HPP_
+#ifndef _SCH25519_STATIC_HPP_
+#define _SCH25519_STATIC_HPP_
 
 // Size definitions TODO: please edit NEPC and NSCC accordingly
 // for Curve25519 keys
 // -- NEPC - base/point components
 // -- NSSC - scalar components
-#define PKEY_NEPC 3
+#define PKEY_NEPC 2
 #define PKEY_NSCC 0
 #define PKEY_SZ PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ
 // only define secrets here, ignore the pubkey element in skey
@@ -49,18 +49,17 @@
 		SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ
 #define SKEY_NC SKEY_NEPC+SKEY_NSCC+PKEY_NEPC+PKEY_NSCC
 // signature
-#define SGNT_NEPC 3
+#define SGNT_NEPC 2
 #define SGNT_NSCC 2
 #define SGNT_SZ SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ
 
 #include <stddef.h>
 
-namespace <TEMPLATE> {
+namespace sch25519 {
 
 	struct pubkey{
 		unsigned char *B;
 		unsigned char *P1;
-		unsigned char *P2;
 	};
 
 	struct seckey{
@@ -74,7 +73,6 @@ namespace <TEMPLATE> {
 		unsigned char *x;
 		//points
 		unsigned char *U;
-		unsigned char *V;
 		unsigned char *B;
 	};
 

@@ -1,5 +1,5 @@
 /*
- * internals/<TEMPLATE>/base.hpp - id2 library
+ * internals/sch25519/base.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,14 +23,14 @@
  * SOFTWARE.
  */
 
-#ifndef _<TEMPLATE>_BASE_HPP_
-#define _<TEMPLATE>_BASE_HPP_
+#ifndef _SCH25519_BASE_HPP_
+#define _SCH25519_BASE_HPP_
 
 #include "../internal.hpp"
 #include "static.hpp"
 #include "proto.hpp"
 
-namespace <TEMPLATE>{
+namespace sch25519{
 	const struct algostr ftable = {
 		&randomkey,
 		&signatgen,
