@@ -41,9 +41,6 @@
 //internals
 #include "internals/proto.hpp"
 #include "internals/ifcall.hpp"
-//to be deleted once the iftable completes
-#include "internals/tnc25519/static.hpp"
-#include "internals/tnc25519/proto.hpp"
 
 // standard lib
 #include <cstdlib>
@@ -60,7 +57,7 @@ namespace a25519
 {
 	//standard signatures
 	int keygen(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char **pbuffer, size_t *plen,
 		unsigned char **sbuffer, size_t *slen
 	){
@@ -68,21 +65,21 @@ namespace a25519
 		void *key;
 		//generate random key
 		//tnc25519::randomkey(&key);
-		iftable[algotype]->randkeygen(&key);
+		iftable[a]->randkeygen(&key);
 		if(key == NULL)return 1;
 
 		//serialize the key to string
-		tnc25519::secserial(key,sbuffer,slen);
-		tnc25519::pubserial(key,pbuffer,plen);
+		iftable[a]->secserial(key, sbuffer, slen);
+		iftable[a]->pubserial(key, pbuffer, plen);
 
 #ifdef DEBUG
-tnc25519::secprint(key);
+iftable[a]->secprint(key);
 printf("sbuffer %lu: ",*slen); ucbprint(*sbuffer, *slen); printf("\n");
 printf("pbuffer %lu: ",*plen); ucbprint(*pbuffer, *plen); printf("\n");
 #endif
 
 		//clear the key
-		tnc25519::secdestroy(key);
+		iftable[a]->secdestroy(key);
 
 		return 0;
 	}
@@ -90,52 +87,52 @@ printf("pbuffer %lu: ",*plen); ucbprint(*pbuffer, *plen); printf("\n");
 namespace sig{
 
 	int sign(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *sbuffer, size_t slen,
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char **obuffer, size_t *olen
 	){
-		struct tnc25519::seckey *key;
-		struct tnc25519::signat *sig;
+		void *key;
+		void *sig;
 		//obtain key from serialize string
-		key = tnc25519::secstruct(sbuffer, slen);
+		iftable[a]->secstruct(sbuffer, slen, &key);
 		//signature generation
-		sig = tnc25519::signatgen(key, mbuffer, mlen);
+		iftable[a]->signatgen(key, mbuffer, mlen, &sig);
 
 		//clear the secret key
-		secdestroy(key);
+		iftable[a]->secdestroy(key);
 
 		//serialize the signature to string
-		tnc25519::sigserial(sig, obuffer, olen);
+		iftable[a]->sigserial(sig, obuffer, olen);
 
 #ifdef DEBUG
-sigprint(sig);
+iftable[a]->sigprint(sig);
 printf("obuffer %lu: ",*olen); ucbprint(*obuffer, *olen); printf("\n");
 #endif
 
 		//clear the signature
-		sigdestroy(sig);
+		iftable[a]->sigdestroy(sig);
 
 		return 0;
 	}
 
 	int verify(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *pbuffer, size_t plen,
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen
 	){
 		int rc;
 		//obtain paramter (public key) and signature from serialize string
-		struct tnc25519::pubkey *par;
-		struct tnc25519::signat *sig;
-		par = tnc25519::pubstruct(pbuffer, plen);
-		sig = tnc25519::sigstruct(obuffer, olen);
+		void *par;
+		void *sig;
+		iftable[a]->pubstruct(pbuffer, plen, &par);
+		iftable[a]->sigstruct(obuffer, olen, &sig);
 
-		rc = signatchk(par, sig, mbuffer, mlen);
+		rc = iftable[a]->signatchk(par, sig, mbuffer, mlen);
 
-		sigdestroy(sig);
-		pubdestroy(par);
+		iftable[a]->sigdestroy(sig);
+		iftable[a]->pubdestroy(par);
 		return rc;
 	}
 }
@@ -143,7 +140,7 @@ printf("obuffer %lu: ",*olen); ucbprint(*obuffer, *olen); printf("\n");
 namespace ibi{
 
 	int prove(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen,
 		int csock
@@ -155,7 +152,8 @@ namespace ibi{
 
 		int rc;
 		//parse the usk
-		struct tnc25519::signat *usk = tnc25519::sigstruct(obuffer, olen);
+		void *usk;
+		iftable[a]->sigstruct(obuffer, olen, &usk);
 
 		debug("Sending ID string %s\n",mbuffer);
 		rc = general::client::establish( csock, mbuffer, mlen );
@@ -165,15 +163,15 @@ namespace ibi{
 		}
 		debug("Go-Ahead received (0x5a), Starting PROVE protocol\n");
 
-		rc = tnc25519::client::executeproto( csock, mbuffer, mlen, usk );
+		rc = iftable[a]->signatprv( csock, usk, mbuffer, mlen);
 
 		//free up the usk
-		tnc25519::sigdestroy(usk);
+		iftable[a]->sigdestroy(usk);
 		return rc;
 	}
 
 	int verify(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *pbuffer, size_t plen,
 		unsigned char **mbuffer, size_t *mlen,
 		int csock
@@ -185,7 +183,8 @@ namespace ibi{
 
 		int rc;
 		//parse the params (public key)
-		struct tnc25519::pubkey *par = tnc25519::pubstruct(pbuffer, plen);
+		void *par;
+		iftable[a]->pubstruct(pbuffer, plen, &par);
 
 		rc = general::server::establish( csock, mbuffer, mlen );
 		if(rc != 0){
@@ -193,18 +192,15 @@ namespace ibi{
 			return 1;
 		}
 		debug("Go-Ahead sent (0x5a), Starting VERIFY protocol\n");
-		rc = tnc25519::server::executeproto( csock, *mbuffer, *mlen, par );
+		rc = iftable[a]->signatvrf( csock, par, *mbuffer, *mlen);
 
 		//free up
-		tnc25519::pubdestroy(par);
+		iftable[a]->pubdestroy(par);
 		return rc;
 	}
 
-	/*
-	 * Don't touch the following until security is proven
-	 */
 	int oclient(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen,
 		const char *srv, int port,
@@ -225,7 +221,7 @@ namespace ibi{
 		}
 		debug("Connection established with %s:%d\n",srv,port);
 
-		rc = prove(algotype, mbuffer, mlen, obuffer, olen, tsock );
+		rc = prove(a, mbuffer, mlen, obuffer, olen, tsock );
 		close(tsock);
 
 		return rc;
@@ -233,7 +229,7 @@ namespace ibi{
 
 	// PLEASE CLOSE THE SOCKET YOURSELF AFTER USING.
 	int client(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen,
 		const char *srv, int port, int timeout
@@ -251,7 +247,7 @@ namespace ibi{
 		}
 		debug("Connection established with %s:%d\n",srv,port);
 
-		rc = prove(algotype, mbuffer, mlen, obuffer, olen, tsock );
+		rc = prove(a, mbuffer, mlen, obuffer, olen, tsock );
 		if(rc==0){
 			return tsock;
 		}else{
@@ -261,7 +257,7 @@ namespace ibi{
 
 	//one shot server
 	int oserver(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *pbuffer, size_t plen,
 		unsigned char **mbuffer, size_t *mlen,
 		int port, int timeout
@@ -287,7 +283,7 @@ namespace ibi{
 		inet_ntop( AF_INET, &ipaddr, ipastr, INET_ADDRSTRLEN );
 		if(csock < 0){lerror("Connection failed to establish with %s\n",ipastr);return 1;}
 		debug("Connection established with %s\n",ipastr);
-		rc = verify(algotype, pbuffer, plen, mbuffer, mlen, csock );
+		rc = verify(a, pbuffer, plen, mbuffer, mlen, csock );
 		close(csock);
 		close(ssock);
 		return rc;
@@ -296,7 +292,7 @@ namespace ibi{
 
 	//TODO: implement this with 'select'
 	void server(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *pbuffer, size_t plen,
 		int port, int timeout, int maxcq,
 		void (*callback)(int, int, const unsigned char *, size_t)
@@ -331,7 +327,7 @@ namespace ibi{
 			ipaddr = cli.sin_addr;
 			inet_ntop( AF_INET, &ipaddr, ipastr, INET_ADDRSTRLEN );
 			debug("Connection established with %s\n",ipastr);
-			rc = verify(algotype, pbuffer, plen, &mbuffer, &mlen, csock );
+			rc = verify(a, pbuffer, plen, &mbuffer, &mlen, csock );
 			callback(rc, csock, mbuffer, mlen ); //runs the callback func
 			close(csock);
 		}
@@ -343,28 +339,30 @@ namespace ibi{
 namespace test{
 
 	int offline(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *pbuffer, size_t plen,
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen
 	){
 		int rc;
-		struct tnc25519::pubkey *par = tnc25519::pubstruct(pbuffer, plen);
-		struct tnc25519::signat *usk = tnc25519::sigstruct(obuffer, olen);
+		void *par;
+		void *usk;
+		iftable[a]->pubstruct(pbuffer, plen, &par);
+		iftable[a]->sigstruct(obuffer, olen, &usk);
 
 		//run test
-		rc = tnc25519::putest(par, usk, mbuffer, mlen);
+		rc = iftable[a]->prototest(par, usk, mbuffer, mlen);
 
 		//clear out
-		tnc25519::pubdestroy(par);
-		tnc25519::sigdestroy(usk);
+		iftable[a]->pubdestroy(par);
+		iftable[a]->sigdestroy(usk);
 
 		return rc;
 	}
 
 
 	void client(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *obuffer, size_t olen,
 		const char *srv, int port,
@@ -389,7 +387,7 @@ namespace test{
 
 		start = clock();
 		for(i=0; i<count;i++){
-			rc = ibi::prove(algotype, mbuffer, mlen, obuffer, olen, tsock );
+			rc = ibi::prove(a, mbuffer, mlen, obuffer, olen, tsock );
 		}
 		end = clock();
 		cpu_time_use = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000; //record time
@@ -403,7 +401,7 @@ namespace test{
 	//but records average time and expect 100 authentication attempts
 	//FOR testing purposes
 	void server(
-		unsigned int algotype,
+		unsigned int a,
 		unsigned char *pbuffer, size_t plen,
 		int port, unsigned int count
 	){
@@ -434,7 +432,7 @@ namespace test{
 		//record
 		start = clock();
 		for(i = 0; i < count; i++){
-			rc = ibi::verify(algotype, pbuffer, plen, &mbuffer, &mlen, csock );
+			rc = ibi::verify(a, pbuffer, plen, &mbuffer, &mlen, csock );
 			//callback(rc, csock, mbuffer, mlen ); //runs the callback func
 		}
 		end = clock();

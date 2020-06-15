@@ -27,26 +27,31 @@
 #define _INTERNAL_HPP_
 struct algostr{
 	void (*randkeygen)(void **);
-	//void (*signatgen)( void *, unsigned char *, size_t );
-	//void (*signatchk)( void *, void *, unsigned char *, size_t );
+	void (*signatgen)( void *, unsigned char *, size_t, void ** );
+	int (*signatchk)(void *,void *, unsigned char *, size_t);
 
-	//void (*secserial)( void *, unsigned char **, size_t *);
-	//void (*pubserial)( void *, unsigned char **, size_t *);
-	//void (*sigserial)( void *, unsigned char **, size_t *);
-	//void (*secstruct)( unsigned char *, size_t);
-	//void (*pubstruct)( unsigned char *, size_t);
-	//void (*sigstruct)( unsigned char *, size_t);
+	unsigned char *(*hashexec)(
+		unsigned char *mbuffer, size_t mlen,
+		unsigned char *ubuffer,
+		unsigned char *vbuffer
+	);
+	void (*hashfree)(unsigned char *hash);
 
-	//void (*secdestroy)(void *);
-	//void (*pubdestroy)(void *);
-	//void (*sigdestroy)(void *);
+	size_t (*secserial)(void *, unsigned char **, size_t *);
+	size_t (*pubserial)(void *, unsigned char **, size_t *);
+	size_t (*sigserial)(void *, unsigned char **, size_t *);
+	void (*secstruct)(unsigned char *, size_t, void **);
+	void (*pubstruct)(unsigned char *, size_t, void **);
+	void (*sigstruct)(unsigned char *, size_t, void **);
+	void (*secdestroy)(void *);
+	void (*pubdestroy)(void *);
+	void (*sigdestroy)(void *);
+	void (*secprint)(void *);
+	void (*pubprint)(void *);
+	void (*sigprint)(void *);
 
-	//void (*secprint)(void *);
-	//void (*pubprint)(void *);
-	//void (*sigprint)(void *);
-
-	//void (*client)(int, unsigned char *, size_t, void *);
-	//void (*server)(int, unsigned char *, size_t, void *);
-	//void (*putest)(void *, void *, unsigned char *, size_t);
+	int (*signatprv)(int, void *, unsigned char *, size_t);
+	int (*signatvrf)(int, void *, unsigned char *, size_t);
+	int (*prototest)(void *, void *, unsigned char *, size_t);
 };
 #endif

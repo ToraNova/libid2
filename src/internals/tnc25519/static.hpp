@@ -79,23 +79,19 @@ namespace tnc25519 {
 	};
 
 	//randomly generate a key
-	//return a key on success, null on error
-	//struct seckey *randomkey();
-	void randomkey(void **);
+	void randomkey(void **secout);
 
 	//generate a signature based on a seckey and message
-	//key - secret key used to sign message
-	//mbuffer - buffer containing message to be signed
-	//mlen - length of contents in mbuffer
-	struct signat *signatgen(
-		struct seckey *key,
-		unsigned char *mbuffer, size_t mlen
+	void signatgen(
+		void *vkey,
+		unsigned char *mbuffer, size_t mlen,
+		void **out
 	);
 
 	//check a signature
 	int signatchk(
-		struct pubkey *par,
-		struct signat *sig,
+		void *vpar,
+		void *vsig,
 		unsigned char *mbuffer, size_t mlen
 	);
 
@@ -112,23 +108,23 @@ namespace tnc25519 {
 	//serialize the secret,public and signature from a structure
 	size_t secserial(void *in, unsigned char **sbuffer, size_t *slen);
 	size_t pubserial(void *in, unsigned char **pbuffer, size_t *plen);
-	size_t sigserial(struct signat *in, unsigned char **obuffer, size_t *olen);
+	size_t sigserial(void *in, unsigned char **obuffer, size_t *olen);
 
 	//creates a public key struct from the serialize string
 	//inverse of secserial, pubserial and sigserial
-	struct seckey *secstruct(unsigned char *sbuffer, size_t slen);
-	struct pubkey *pubstruct(unsigned char *pbuffer, size_t plen);
-	struct signat *sigstruct(unsigned char *obuffer, size_t olen);
+	void secstruct(unsigned char *sbuffer, size_t slen, void **out);
+	void pubstruct(unsigned char *pbuffer, size_t plen, void **out);
+	void sigstruct(unsigned char *obuffer, size_t olen, void **out);
 
 	//destroy secret,public and signature struct
 	void secdestroy(void *in);
-	void pubdestroy(struct pubkey *in);
-	void sigdestroy(struct signat *in);
+	void pubdestroy(void *in);
+	void sigdestroy(void *in);
 
 	//print out key,signature structure (debugging use)
 	void secprint(void *in);
 	void pubprint(void *in);
-	void sigprint(struct signat *in);
+	void sigprint(void *in);
 }
 
 #endif

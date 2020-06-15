@@ -215,13 +215,13 @@ AUTOMAKE = ${SHELL} /home/cjason/prodev/id2/missing automake-1.16
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -ggdb3 -O0 -Wall
+CFLAGS = -DDEBUG -g -O3
 CPP = gcc -E
 CPPFLAGS = -DDEBUG
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O0 -Wall
+CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps

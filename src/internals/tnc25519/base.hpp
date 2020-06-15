@@ -32,7 +32,26 @@
 
 namespace tnc25519{
 	const struct algostr ftable = {
-		&randomkey
+		&randomkey,
+		&signatgen,
+		&signatchk,
+		&hashexec,
+		&hashfree,
+		&secserial,
+		&pubserial,
+		&sigserial,
+		&secstruct,
+		&pubstruct,
+		&sigstruct,
+		&secdestroy,
+		&pubdestroy,
+		&sigdestroy,
+		&secprint,
+		&pubprint,
+		&sigprint,
+		&signatprv,
+		&signatvrf,
+		&prototest
 	};
 }
 
