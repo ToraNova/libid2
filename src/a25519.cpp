@@ -223,7 +223,6 @@ namespace ibi{
 
 		rc = prove(a, mbuffer, mlen, obuffer, olen, tsock );
 		close(tsock);
-
 		return rc;
 	}
 

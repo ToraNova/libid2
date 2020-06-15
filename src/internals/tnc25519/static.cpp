@@ -159,7 +159,7 @@ namespace tnc25519{
 		crypto_core_ristretto255_scalar_mul( tmp->s , tmp->x, key->a );
 		crypto_core_ristretto255_scalar_add( tmp->s, tmp->s, nonce );
 
-		*out = (void *) tmp;
+		*out = (void *) tmp; return;
 	}
 
 	int signatchk(

@@ -1,5 +1,5 @@
 /*
- * <TEMPLATE> - id2 library
+ * internals/<TEMPLATE>/static.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * <TEMPLATE> signature scheme key conversion functions
+ * TODO: please edit description
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -65,46 +65,45 @@
  *
  */
 
-
 namespace <TEMPLATE>{
 
-	struct seckey *randomkey(){
-		int rc;
+	void randomkey(void **out){
 		//declare and allocate memory for key
-		struct seckey *out;
-		out = (struct seckey *)malloc( sizeof(struct seckey) );
+		int rc; struct seckey *tmp;
+		tmp = (struct seckey *)malloc( sizeof(struct seckey) );
 		//allocate memory for pubkey
-		out->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
+		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
-		//TODO
-
-		return out;
+		//recast and return
+		*out = (void *) tmp; return;
 	}
 
-	struct signat *signatgen(
-		struct seckey *key,
-		unsigned char *mbuffer, size_t mlen
+	void signatgen(
+		void *vkey,
+		unsigned char *mbuffer, size_t mlen,
+		void **out
 	){
-		int rc;
+		//key recast
+		int rc; struct signat *tmp;
+		struct seckey *key = (struct seckey *)vkey;
 		//declare and allocate for signature struct
-		struct signat *out;
-		out = (struct signat *)malloc( sizeof( struct signat) );
+		tmp = (struct signat *)malloc( sizeof( struct signat) );
 
-		//TODO
-
-		return out;
+		*out = (void *) tmp; return;
 	}
 
 	int signatchk(
-		struct pubkey *par,
-		struct signat *sig,
+		void *vpar,
+		void *vsig,
 		unsigned char *mbuffer, size_t mlen
 	){
-		int rc;
+		//key recast
+		int rc; unsigned char *xp;
+		struct pubkey *par = (struct pubkey *)vpar;
+		struct signat *sig = (struct signat *)vsig;
 
-		//TODO
-
-		return rc;
+		hashfree(xp);
+		return 0;
 	}
 
 	unsigned char *hashexec(
@@ -115,8 +114,6 @@ namespace <TEMPLATE>{
 		crypto_hash_sha512_state eh_state;
 		unsigned char hshe[RS_HSSZ]; //hash
 		unsigned char *out = (unsigned char *)malloc( RS_SCSZ );
-
-		//TODO?
 
 		//compute hash
 		crypto_hash_sha512_init( &eh_state );
@@ -132,151 +129,183 @@ namespace <TEMPLATE>{
 
 	void hashfree(unsigned char *hash){
 		sodium_memzero(hash, RS_SCSZ);
-		free(hash);
+		free(hash); return;
 	}
 
-	size_t secserial(struct seckey *in, unsigned char **sbuffer, size_t *slen){
+	size_t secserial(void *in, unsigned char **sbuffer, size_t *slen){
 		size_t rs;
+		struct seckey *ri = (struct seckey *)in; //recast the key
 		//set size and allocate
 		*slen = SKEY_SZ;
 		*sbuffer = (unsigned char *)malloc( *(slen) );
 
-		//TODO
-
 		//a, B, P1, P2
-		rs = copyskip( *sbuffer, in->a, 	0, 	RS_SCSZ);
-		rs = copyskip( *sbuffer, in->pub->B, 	rs, 	RS_EPSZ);
-		rs = copyskip( *sbuffer, in->pub->P1, 	rs, 	RS_EPSZ);
-		rs = copyskip( *sbuffer, in->pub->P2, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->a, 	0, 	RS_SCSZ);
+		rs = copyskip( *sbuffer, ri->pub->B, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
+
 		return rs;
 	}
 
-	size_t pubserial(struct seckey *in, unsigned char **pbuffer, size_t *plen){
+	size_t pubserial(void *in, unsigned char **pbuffer, size_t *plen){
 		size_t rs;
+		struct seckey *ri = (struct seckey *)in; //recast the key
 		//set size and allocate
 		*plen = PKEY_SZ;
 		*pbuffer = (unsigned char *)malloc( *(plen) );
 
-		//TODO
+		//B, P1, P2
+		rs = copyskip( *pbuffer, ri->pub->B, 	0, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
 
 		return rs;
 	}
 
-	size_t sigserial(struct signat *in, unsigned char **obuffer, size_t *olen){
+	size_t sigserial(void *in, unsigned char **obuffer, size_t *olen){
 		size_t rs;
+		struct signat *ri = (struct signat *)in; //recast the key
 		//set size and allocate
 		*olen = SGNT_SZ;
 		*obuffer = (unsigned char *)malloc( *(olen) );
 
-		//TODO
+		//s,x,U,V,B
+		rs = copyskip( *obuffer, ri->s, 	0, 	RS_SCSZ);
+		rs = copyskip( *obuffer, ri->x, 	rs, 	RS_SCSZ);
+		rs = copyskip( *obuffer, ri->U, 	rs, 	RS_EPSZ);
+		rs = copyskip( *obuffer, ri->V, 	rs, 	RS_EPSZ);
+		rs = copyskip( *obuffer, ri->B, 	rs, 	RS_EPSZ);
 
 		return rs;
 	}
 
-	struct seckey *secstruct(unsigned char *sbuffer, size_t slen){
-		struct seckey *out; size_t rs;
+	void secstruct(unsigned char *sbuffer, size_t slen, void **out){
+		struct seckey *tmp; size_t rs;
 		//allocate memory for seckey
-		out = (struct seckey *)malloc( sizeof(struct seckey));
+		tmp = (struct seckey *)malloc( sizeof(struct seckey));
 		//allocate memory for pubkey
-		out->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
-
-		//TODO
+		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements and scalars
-		out->a = (unsigned char *)malloc( RS_SCSZ );
-		out->pub->B = (unsigned char *)malloc( RS_EPSZ );
-		out->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
-		out->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
-		rs = skipcopy( out->a,		sbuffer, 0, 	RS_SCSZ);
-		rs = skipcopy( out->pub->B,	sbuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( out->pub->P1,	sbuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( out->pub->P2,	sbuffer, rs, 	RS_EPSZ);
-		return out;
+		rs = skipcopy( tmp->a,		sbuffer, 0, 	RS_SCSZ);
+		rs = skipcopy( tmp->pub->B,	sbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->pub->P1,	sbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->pub->P2,	sbuffer, rs, 	RS_EPSZ);
+
+		*out = (void *) tmp; return;
 	}
 
 
-	struct pubkey *pubstruct(unsigned char *pbuffer, size_t plen){
-		struct pubkey *out; size_t rs;
+	void pubstruct(unsigned char *pbuffer, size_t plen, void **out){
+		struct pubkey *tmp; size_t rs;
 		//allocate memory for pubkey
-		out = (struct pubkey *)malloc( sizeof(struct pubkey) );
+		tmp = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
-		//TODO
+		//allocate memory for the elements
+		tmp->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->P1 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->P2 = (unsigned char *)malloc( RS_EPSZ );
 
-		return out;
+		rs = skipcopy( tmp->B,		pbuffer, 0, 	RS_EPSZ);
+		rs = skipcopy( tmp->P1,		pbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->P2,		pbuffer, rs, 	RS_EPSZ);
+
+		*out = (void *) tmp; return;
 	}
 
-	struct signat *sigstruct(unsigned char *obuffer, size_t olen){
-		struct signat *out; size_t rs;
+	void sigstruct(unsigned char *obuffer, size_t olen, void **out){
+		struct signat *tmp; size_t rs;
 		//allocate memory for pubkey
-		out = (struct signat *)malloc( sizeof(struct signat) );
+		tmp = (struct signat *)malloc( sizeof(struct signat) );
 
-		//TODO
+		//allocate for components on signature struct
+		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->x = (unsigned char *)malloc( RS_SCSZ );
+		tmp->U = (unsigned char *)malloc( RS_EPSZ );
+		tmp->V = (unsigned char *)malloc( RS_EPSZ );
+		tmp->B = (unsigned char *)malloc( RS_EPSZ );
 
-		return out;
+		rs = skipcopy( tmp->s,		obuffer, 0, 	RS_SCSZ);
+		rs = skipcopy( tmp->x,		obuffer, rs, 	RS_SCSZ);
+		rs = skipcopy( tmp->U,		obuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->V,		obuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->B,		obuffer, rs, 	RS_EPSZ);
+
+		*out = (void *) tmp; return;
 	}
 
 	//destroy secret key
-	void secdestroy(struct seckey *in){
+	void secdestroy(void *in){
+		//key recast
+		struct seckey *ri = (struct seckey *)in;
 		//zero out the secret component
-		sodium_memzero(in->a, RS_SCSZ);
-
-		//TODO
+		sodium_memzero(ri->a, RS_SCSZ);
 
 		//free memory
-		free(in->a);
-		pubdestroy(in->pub);
-		free(in);
+		free(ri->a);
+		pubdestroy(ri->pub);
+		free(ri); return;
 	}
 
-	void pubdestroy(struct pubkey *in){
-		//TODO
+	void pubdestroy(void *in){
+		//key recast
+		struct pubkey *ri = (struct pubkey *)in;
 		//free up memory
-		free(in->B);
-		free(in->P1);
-		free(in->P2);
-		free(in);
+		free(ri->B);
+		free(ri->P1);
+		free(ri->P2);
+		free(ri); return;
 	}
 
-	void sigdestroy(struct signat *in){
-		//TODO
+	void sigdestroy(void *in){
+		//key recast
+		struct signat *ri = (struct signat *)in;
 		//clear the components
-		sodium_memzero(in->s, RS_SCSZ);
-		sodium_memzero(in->x, RS_SCSZ);
-		sodium_memzero(in->U, RS_EPSZ);
-		sodium_memzero(in->V, RS_EPSZ);
+		sodium_memzero(ri->s, RS_SCSZ);
+		sodium_memzero(ri->x, RS_SCSZ);
+		sodium_memzero(ri->U, RS_EPSZ);
+		sodium_memzero(ri->V, RS_EPSZ);
 		//free memory
-		free(in->s);
-		free(in->x);
-		free(in->U);
-		free(in->V);
-		free(in->B);
-		free(in);
+		free(ri->s);
+		free(ri->x);
+		free(ri->U);
+		free(ri->V);
+		free(ri->B);
+		free(ri); return;
 	}
 
 	//debugging use only
-	void secprint(struct seckey *in){
-		//TODO
-		printf("a :"); ucbprint(in->a, RS_SCSZ); printf("\n");
-		printf("B :"); ucbprint(in->pub->B, RS_EPSZ); printf("\n");
-		printf("P1:"); ucbprint(in->pub->P1, RS_EPSZ); printf("\n");
-		printf("P2:"); ucbprint(in->pub->P2, RS_EPSZ); printf("\n");
+	void secprint(void *in){
+		struct seckey *ri = (struct seckey *)in;
+		printf("a :"); ucbprint(ri->a, RS_SCSZ); printf("\n");
+		printf("B :"); ucbprint(ri->pub->B, RS_EPSZ); printf("\n");
+		printf("P1:"); ucbprint(ri->pub->P1, RS_EPSZ); printf("\n");
+		printf("P2:"); ucbprint(ri->pub->P2, RS_EPSZ); printf("\n");
+		return;
 	}
 
-	void pubprint(struct pubkey *in){
-		//TODO
-		printf("B :"); ucbprint(in->B, RS_EPSZ); printf("\n");
-		printf("P1:"); ucbprint(in->P1, RS_EPSZ); printf("\n");
-		printf("P2:"); ucbprint(in->P2, RS_EPSZ); printf("\n");
+	void pubprint(void *in){
+		struct pubkey *ri = (struct pubkey *)in;
+		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
+		printf("P1:"); ucbprint(ri->P1, RS_EPSZ); printf("\n");
+		printf("P2:"); ucbprint(ri->P2, RS_EPSZ); printf("\n");
+		return;
 	}
 
-	void sigprint(struct signat *in){
-		//TODO
-		printf("s :"); ucbprint(in->s, RS_SCSZ); printf("\n");
-		printf("x :"); ucbprint(in->x, RS_SCSZ); printf("\n");
-		printf("U :"); ucbprint(in->U, RS_EPSZ); printf("\n");
-		printf("V :"); ucbprint(in->V, RS_EPSZ); printf("\n");
-		printf("B :"); ucbprint(in->B, RS_EPSZ); printf("\n");
+	void sigprint(void *in){
+		struct signat *ri = (struct signat *)in;
+		printf("s :"); ucbprint(ri->s, RS_SCSZ); printf("\n");
+		printf("x :"); ucbprint(ri->x, RS_SCSZ); printf("\n");
+		printf("U :"); ucbprint(ri->U, RS_EPSZ); printf("\n");
+		printf("V :"); ucbprint(ri->V, RS_EPSZ); printf("\n");
+		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
+		return;
 	}
 
 }

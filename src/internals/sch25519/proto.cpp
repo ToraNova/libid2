@@ -1,5 +1,5 @@
 /*
- * <TEMPLATE> - id2 library
+ * internals/<TEMPLATE>/proto.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * <TEMPLATE> signature scheme key conversion functions
+ * <TEMPLATE> :TODO please edit the description
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -55,43 +55,45 @@
 
 namespace <TEMPLATE>{
 
-namespace client{
+	int signatprv(
+		int sock,
+		void *vusk,
+		unsigned char *mbuffer, size_t mlen
+	){
+		//socket check and key recast
+		if(sock == -1){return 1;}
+		struct signat *usk = (struct signat *)vusk;
+		int rc;
 
-int executeproto(
-	int sock,
-	unsigned char *mbuffer, size_t mlen,
-	struct signat *usk
-){
-	if(sock == -1){return -1;}; int rc;
-	unsigned char buf[TS_MAXSZ] = {0};
-}
+		return 0;
+	}
 
-}
+	int signatvrf(
+		int sock,
+		void *vpar,
+		unsigned char *mbuffer, size_t mlen
+	){
+		//socket check and key recast
+		if(sock == -1){return 1;}
+		struct pubkey *par = (struct pubkey *)vpar;
+		int rc;
 
-namespace server{
-
-int executeproto(
-	int sock,
-	unsigned char *mbuffer, size_t mlen,
-	struct pubkey *par
-){
-	if(sock == -1){return 1;}; int rc;
-	unsigned char buf[TS_MAXSZ] = {0};
-
-	return rc;
-}
-
-}
+		return 0;
+	}
 
 //general (non client or server namespace)
-int putest(
-	struct pubkey *par,
-	struct signat *usk,
-	unsigned char *mbuffer, size_t mlen
-){
-	int rc;
 
-	return rc;
-}
+	int prototest(
+		void *vpar,
+		void *vusk,
+		unsigned char *mbuffer, size_t mlen
+	){
+		//key recast
+		struct pubkey *par = (struct pubkey *)vpar;
+		struct signat *usk = (struct signat *)vusk;
+		int rc;
+
+		return 0;
+	}
 
 }

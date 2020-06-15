@@ -1,5 +1,5 @@
 /*
- * <TEMPLATE> - id2 library
+ * internals/<TEMPLATE>/proto.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * <TEMPLATE> protocol scheme
+ * TODO: please edit description
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -32,6 +32,7 @@
  * this is (mainly) for internal use only!
  */
 
+#ifndef _<TEMPLATE>_PROTO_HPP_
 #define _<TEMPLATE>_PROTO_HPP_
 
 #include <stddef.h>
@@ -39,38 +40,24 @@
 
 namespace <TEMPLATE> {
 
-	namespace client{
+	//prove existence of usk without revealing
+	int signatprv(
+		int sock,
+		void *vusk,
+		unsigned char *mbuffer, size_t mlen
+	);
 
-		// execute ibi protocol as client
-		// sock - the socket connection to server
-		// mbuffer, mlen - id of user/prover
-		// usk - usk struct (signature) of prover
-		int executeproto(
-			int sock,
-			unsigned char *mbuffer, size_t mlen,
-			struct signat *usk
-		);
-
-	}
-
-	namespace server{
-
-		// execute ibi protocol as server
-		// sock - the socket connection to client
-		// par - the parameter of ibi system (public key of kgc)
-		// mbuffer - the client identifying on other end (OUTPUT)
-		int executeproto(
-			int sock,
-			unsigned char *mbuffer, size_t mlen,
-			struct pubkey *par
-		);
-
-	}
+	//verify existence of usk of particular mbuffer(ID)
+	int signatvrf(
+		int sock,
+		void *vpar,
+		unsigned char *mbuffer, size_t mlen
+	);
 
 	// an auxiliary function to test param and usk
-	int putest(
-		struct pubkey *par,
-		struct signat *usk,
+	int prototest(
+		void *vpar,
+		void *vusk,
 		unsigned char *mbuffer, size_t mlen
 	);
 }

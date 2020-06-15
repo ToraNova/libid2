@@ -1,5 +1,5 @@
 /*
- * internals/<TEMPLATE>/proto.hpp - id2 library
+ * internals/<TEMPLATE>/base.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,43 +23,36 @@
  * SOFTWARE.
  */
 
-/*
- * TODO: please edit description
- *
- * ToraNova 2020
- * chia_jason96@live.com
- *
- * this is (mainly) for internal use only!
- */
+#ifndef _<TEMPLATE>_BASE_HPP_
+#define _<TEMPLATE>_BASE_HPP_
 
-#ifndef _<TEMPLATE>_PROTO_HPP_
-#define _<TEMPLATE>_PROTO_HPP_
-
-#include <stddef.h>
+#include "../internal.hpp"
 #include "static.hpp"
+#include "proto.hpp"
 
-namespace <TEMPLATE> {
-
-	//prove existence of usk without revealing
-	int signatprv(
-		int sock,
-		void *vusk,
-		unsigned char *mbuffer, size_t mlen
-	);
-
-	//verify existence of usk of particular mbuffer(ID)
-	int signatvrf(
-		int sock,
-		void *vpar,
-		unsigned char *mbuffer, size_t mlen
-	);
-
-	// an auxiliary function to test param and usk
-	int prototest(
-		void *vpar,
-		void *vusk,
-		unsigned char *mbuffer, size_t mlen
-	);
+namespace <TEMPLATE>{
+	const struct algostr ftable = {
+		&randomkey,
+		&signatgen,
+		&signatchk,
+		&hashexec,
+		&hashfree,
+		&secserial,
+		&pubserial,
+		&sigserial,
+		&secstruct,
+		&pubstruct,
+		&sigstruct,
+		&secdestroy,
+		&pubdestroy,
+		&sigdestroy,
+		&secprint,
+		&pubprint,
+		&sigprint,
+		&signatprv,
+		&signatvrf,
+		&prototest
+	};
 }
 
 #endif
