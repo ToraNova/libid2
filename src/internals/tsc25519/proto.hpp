@@ -1,5 +1,5 @@
 /*
- * internals/cmacro.h - id2 library
+ * internals/tsc25519/proto.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,32 +24,42 @@
  */
 
 /*
- * Constants and macro file
- * stores all defines here
- *
- * PLEASE DO NOT STORE CONFIGURATION MACROS, use autotools for that instead!
+ * TODO: please edit description
  *
  * ToraNova 2020
  * chia_jason96@live.com
+ *
+ * this is (mainly) for internal use only!
  */
 
-#ifndef _CMACRO_H_
-#define _CMACRO_H_
+#ifndef _TSC25519_PROTO_HPP_
+#define _TSC25519_PROTO_HPP_
 
-#include <sodium/crypto_core_ristretto255.h>
+#include <stddef.h>
+#include "static.hpp"
 
-// SIZES
-// Ristretto255
-#define RS_EPSZ crypto_core_ristretto255_BYTES
-#define RS_SCSZ crypto_core_ristretto255_SCALARBYTES
-#define RS_HSSZ crypto_core_ristretto255_HASHBYTES
+namespace tsc25519 {
 
-// TCP socket
-#define TS_MAXSZ 1024
+	//prove existence of usk without revealing
+	int signatprv(
+		int sock,
+		void *vusk,
+		unsigned char *mbuffer, size_t mlen
+	);
 
-// SIGNALS
-//go-ahead
-#define SIG_GA 0x5a
+	//verify existence of usk of particular mbuffer(ID)
+	int signatvrf(
+		int sock,
+		void *vpar,
+		unsigned char *mbuffer, size_t mlen
+	);
+
+	// an auxiliary function to test param and usk
+	int prototest(
+		void *vpar,
+		void *vusk,
+		unsigned char *mbuffer, size_t mlen
+	);
+}
 
 #endif
-

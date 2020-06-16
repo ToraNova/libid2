@@ -25,18 +25,11 @@
 
 #ifndef _INTERNAL_HPP_
 #define _INTERNAL_HPP_
+
 struct algostr{
 	void (*randkeygen)(void **);
 	void (*signatgen)( void *, unsigned char *, size_t, void ** );
 	int (*signatchk)(void *,void *, unsigned char *, size_t);
-
-	unsigned char *(*hashexec)(
-		unsigned char *mbuffer, size_t mlen,
-		unsigned char *ubuffer,
-		unsigned char *vbuffer
-	);
-	void (*hashfree)(unsigned char *hash);
-
 	size_t (*secserial)(void *, unsigned char **, size_t *);
 	size_t (*pubserial)(void *, unsigned char **, size_t *);
 	size_t (*sigserial)(void *, unsigned char **, size_t *);
@@ -49,7 +42,6 @@ struct algostr{
 	void (*secprint)(void *);
 	void (*pubprint)(void *);
 	void (*sigprint)(void *);
-
 	int (*signatprv)(int, void *, unsigned char *, size_t);
 	int (*signatvrf)(int, void *, unsigned char *, size_t);
 	int (*prototest)(void *, void *, unsigned char *, size_t);

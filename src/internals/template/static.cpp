@@ -74,6 +74,7 @@ namespace <TEMPLATE>{
 		//allocate memory for pubkey
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
+		//--------------------------TODO START
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
 		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
@@ -100,6 +101,7 @@ namespace <TEMPLATE>{
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
 		}
+		//--------------------------TODO END
 
 		//recast and return
 		*out = (void *) tmp; return;
@@ -110,16 +112,12 @@ namespace <TEMPLATE>{
 		unsigned char *mbuffer, size_t mlen,
 		void **out
 	){
-		//key recast
-		int rc; struct signat *tmp;
-		struct seckey *key = (struct seckey *)vkey;
-		//declare and allocate for signature struct
-		tmp = (struct signat *)malloc( sizeof( struct signat) );
+		//declare and allocate for signature struct, nonce
+		struct seckey *key = (struct seckey *)vkey; //recast key
+		struct signat *tmp = (struct signat *)malloc(sizeof(struct signat));
+		int rc; unsigned char nonce[RS_SCSZ];
 
 		//--------------------------TODO START
-		//nonce, r and hash
-		unsigned char nonce[RS_SCSZ];
-
 		//allocate for components
 		tmp->s = (unsigned char *)malloc( RS_SCSZ );
 		//tmp->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
@@ -166,7 +164,7 @@ namespace <TEMPLATE>{
 		void *vsig,
 		unsigned char *mbuffer, size_t mlen
 	){
-		//key recast
+		//key recast and declaration
 		int rc; unsigned char *xp;
 		struct pubkey *par = (struct pubkey *)vpar;
 		struct signat *sig = (struct signat *)vsig;
@@ -175,7 +173,6 @@ namespace <TEMPLATE>{
 		unsigned char tmp1[RS_EPSZ]; //tmp array
 		unsigned char tmp2[RS_EPSZ]; //tmp array
 		unsigned char tmp3[RS_EPSZ]; //tmp array
-		unsigned char *xp;
 
 		// U' = sB - xP1
 		rc = crypto_scalarmult_ristretto255(

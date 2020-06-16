@@ -1,5 +1,5 @@
 /*
- * internals/sch25519/static.hpp - id2 library
+ * internals/tsc25519/static.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -32,29 +32,36 @@
  * this is for internal use only!
  */
 
-#ifndef _SCH25519_STATIC_HPP_
-#define _SCH25519_STATIC_HPP_
+#ifndef _TSC25519_STATIC_HPP_
+#define _TSC25519_STATIC_HPP_
 
 #include "../cmacro.h"
 #include <stddef.h>
 
-namespace sch25519 {
+namespace tsc25519 {
 
 	// Size definitions TODO: please edit NEPC and NSCC accordingly
-	const size_t PKEY_NEPC = 2;
+	// for Curve25519 keys
+	// -- NEPC - base/point components
+	// -- NSSC - scalar components
+	const size_t PKEY_NEPC = 4;
 	const size_t PKEY_NSCC = 0;
 	const size_t PKEY_SZ = PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ;
+	// only define secrets here, ignore the pubkey element in skey
 	const size_t SKEY_NEPC = 0;
 	const size_t SKEY_NSCC = 1;
 	const size_t SKEY_SZ =  PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ+
 				SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ;
-	const size_t SGNT_NEPC = 2;
+	// signature
+	const size_t SGNT_NEPC = 3;
 	const size_t SGNT_NSCC = 2;
 	const size_t SGNT_SZ = SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ;
 
 	struct pubkey{
-		unsigned char *B;
+		unsigned char *B1;
+		unsigned char *B2;
 		unsigned char *P1;
+		unsigned char *P2;
 	};
 
 	struct seckey{
@@ -68,7 +75,8 @@ namespace sch25519 {
 		unsigned char *x;
 		//points
 		unsigned char *U;
-		unsigned char *B;
+		unsigned char *V;
+		unsigned char *B1;
 	};
 
 	//randomly generate a key
@@ -88,12 +96,13 @@ namespace sch25519 {
 		unsigned char *mbuffer, size_t mlen
 	);
 
-	// hash( m, u, v) to a scalar in ristretto255
-	// output is always size RS_SCSZ
+	//hashexec (internal)
 	unsigned char *hashexec(
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *ubuffer,
-		unsigned char *vbuffer
+		unsigned char *vbuffer,
+		unsigned char *pbuffer,
+		unsigned char *qbuffer
 	);
 	//frees up the hash
 	void hashfree(unsigned char *hash);

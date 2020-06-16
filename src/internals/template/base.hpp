@@ -35,8 +35,6 @@ namespace <TEMPLATE>{
 		&randomkey,
 		&signatgen,
 		&signatchk,
-		&hashexec,
-		&hashfree,
 		&secserial,
 		&pubserial,
 		&sigserial,

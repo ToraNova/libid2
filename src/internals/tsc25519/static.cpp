@@ -1,5 +1,5 @@
 /*
- * internals/tnc25519/static.cpp - id2 library
+ * internals/tsc25519/static.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * TNC signature scheme key conversion functions
+ * TODO: please edit description
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -65,31 +65,32 @@
  *
  */
 
-namespace tnc25519{
+namespace tsc25519{
 
 	void randomkey(void **out){
-		int rc;
 		//declare and allocate memory for key
-		struct seckey *tmp;
+		int rc; struct seckey *tmp;
 		tmp = (struct seckey *)malloc( sizeof(struct seckey) );
-
 		//allocate memory for pubkey
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
+		unsigned char neg[RS_SCSZ];
 
-		//allocate memory for the elements and scalars
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
-		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->B1 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
 		//sample a and B
 		crypto_core_ristretto255_scalar_random( tmp->a );
-		crypto_core_ristretto255_random( tmp->pub->B );
+		crypto_core_ristretto255_scalar_negate(neg , tmp->a);
+		crypto_core_ristretto255_random( tmp->pub->B1 );
+		crypto_core_ristretto255_random( tmp->pub->B2 );
 
 		rc = crypto_scalarmult_ristretto255(
 				tmp->pub->P1,
-				tmp->a,
-				tmp->pub->B
+				neg,
+				tmp->pub->B1
 				); // P1 = aB
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
@@ -97,13 +98,14 @@ namespace tnc25519{
 
 		rc = crypto_scalarmult_ristretto255(
 				tmp->pub->P2,
-				tmp->a,
-				tmp->pub->P1
+				neg,
+				tmp->pub->B2
 				); // P2 = aP1
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
 		}
 
+		//recast and return
 		*out = (void *) tmp; return;
 	}
 
@@ -122,7 +124,7 @@ namespace tnc25519{
 		//tmp->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->V = (unsigned char *)malloc( RS_EPSZ );
-		tmp->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->B1 = (unsigned char *)malloc( RS_EPSZ );
 
 		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
 		crypto_core_ristretto255_scalar_random(nonce);
@@ -130,7 +132,7 @@ namespace tnc25519{
 		rc = crypto_scalarmult_ristretto255(
 				tmp->U,
 				nonce,
-				key->pub->B
+				key->pub->B1
 				); // U = rB
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
@@ -139,20 +141,23 @@ namespace tnc25519{
 		rc = crypto_scalarmult_ristretto255(
 				tmp->V,
 				nonce,
-				key->pub->P1
+				key->pub->B2
 				); // V = rP1
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
 		}
 
 		//store B on the signature
-		memcpy( tmp->B, key->pub->B, RS_EPSZ );
+		memcpy( tmp->B1, key->pub->B1, RS_EPSZ );
 
-		tmp->x = hashexec(mbuffer, mlen, tmp->U, tmp->V);
+		tmp->x = hashexec(mbuffer, mlen,
+				tmp->U, tmp->V,
+				key->pub->P1, key->pub->P2);
 
 		// s = r + xa
 		crypto_core_ristretto255_scalar_mul( tmp->s , tmp->x, key->a );
 		crypto_core_ristretto255_scalar_add( tmp->s, tmp->s, nonce );
+		//--------------------------TODO END
 
 		*out = (void *) tmp; return;
 	}
@@ -162,21 +167,21 @@ namespace tnc25519{
 		void *vsig,
 		unsigned char *mbuffer, size_t mlen
 	){
-		//key recast
+		//key recast and declaration
+		int rc; unsigned char *xp;
 		struct pubkey *par = (struct pubkey *)vpar;
 		struct signat *sig = (struct signat *)vsig;
-		int rc;
 
+		//--------------------------TODO START
 		unsigned char tmp1[RS_EPSZ]; //tmp array
 		unsigned char tmp2[RS_EPSZ]; //tmp array
 		unsigned char tmp3[RS_EPSZ]; //tmp array
-		unsigned char *xp;
 
 		// U' = sB - xP1
 		rc = crypto_scalarmult_ristretto255(
 				tmp1,
 				sig->s,
-				par->B
+				par->B1
 				);
 		if( rc != 0 ) return rc; //abort if fail
 		rc = crypto_scalarmult_ristretto255(
@@ -185,14 +190,14 @@ namespace tnc25519{
 				par->P1
 				);
 		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_sub( tmp3, tmp1, tmp2 ); //tmp3 U'
+		rc = crypto_core_ristretto255_add( tmp3, tmp1, tmp2 ); //tmp3 U'
 		if( rc != 0 ) return rc; //abort if fail
 
 		// V' = sP1 - xP2
 		rc = crypto_scalarmult_ristretto255(
 				tmp1,
 				sig->s,
-				par->P1
+				par->B2
 				);
 		if( rc != 0 ) return rc; //abort if fail
 		rc = crypto_scalarmult_ristretto255(
@@ -201,10 +206,10 @@ namespace tnc25519{
 				par->P2
 				);
 		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_sub( tmp2, tmp1, tmp2 ); //tmp4 V'
+		rc = crypto_core_ristretto255_add( tmp2, tmp1, tmp2 ); //tmp4 V'
 		if( rc != 0 ) return rc; //abort if fail
 
-		xp = hashexec(mbuffer, mlen, tmp3, tmp2);
+		xp = hashexec(mbuffer, mlen, tmp3, tmp2, par->P1, par->P2);
 
 		//check if tmp is equal to x from obuffer
 		rc = crypto_verify_32( xp, sig->x );
@@ -216,17 +221,19 @@ namespace tnc25519{
 		printf("U':"); ucbprint(tmp3, RS_EPSZ); printf("\n");
 		printf("V':"); ucbprint(tmp2, RS_EPSZ); printf("\n");
 #endif
+		//--------------------------TODO END
 
 		//free any allocated stuff
 		hashfree(xp);
-
 		return rc;
 	}
 
 	unsigned char *hashexec(
 		unsigned char *mbuffer, size_t mlen,
 		unsigned char *ubuffer,
-		unsigned char *vbuffer
+		unsigned char *vbuffer,
+		unsigned char *pbuffer,
+		unsigned char *qbuffer
 	){
 		crypto_hash_sha512_state eh_state;
 		unsigned char hshe[RS_HSSZ]; //hash
@@ -237,6 +244,8 @@ namespace tnc25519{
 		crypto_hash_sha512_update( &eh_state, mbuffer, mlen);
 		crypto_hash_sha512_update( &eh_state, ubuffer, RS_EPSZ);
 		crypto_hash_sha512_update( &eh_state, vbuffer, RS_EPSZ);
+		crypto_hash_sha512_update( &eh_state, pbuffer, RS_EPSZ);
+		crypto_hash_sha512_update( &eh_state, qbuffer, RS_EPSZ);
 		crypto_hash_sha512_final( &eh_state, hshe);
 		crypto_core_ristretto255_scalar_reduce(
 			out, (const unsigned char *)hshe
@@ -258,9 +267,11 @@ namespace tnc25519{
 
 		//a, B, P1, P2
 		rs = copyskip( *sbuffer, ri->a, 	0, 	RS_SCSZ);
-		rs = copyskip( *sbuffer, ri->pub->B, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->pub->B1, 	rs, 	RS_EPSZ);
+		rs = copyskip( *sbuffer, ri->pub->B2, 	rs, 	RS_EPSZ);
 		rs = copyskip( *sbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
 		rs = copyskip( *sbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
+
 		return rs;
 	}
 
@@ -272,9 +283,11 @@ namespace tnc25519{
 		*pbuffer = (unsigned char *)malloc( *(plen) );
 
 		//B, P1, P2
-		rs = copyskip( *pbuffer, ri->pub->B, 	0, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->B1, 	0, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->B2, 	rs, 	RS_EPSZ);
 		rs = copyskip( *pbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
 		rs = copyskip( *pbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
+
 		return rs;
 	}
 
@@ -290,7 +303,8 @@ namespace tnc25519{
 		rs = copyskip( *obuffer, ri->x, 	rs, 	RS_SCSZ);
 		rs = copyskip( *obuffer, ri->U, 	rs, 	RS_EPSZ);
 		rs = copyskip( *obuffer, ri->V, 	rs, 	RS_EPSZ);
-		rs = copyskip( *obuffer, ri->B, 	rs, 	RS_EPSZ);
+		rs = copyskip( *obuffer, ri->B1, 	rs, 	RS_EPSZ);
+
 		return rs;
 	}
 
@@ -303,14 +317,17 @@ namespace tnc25519{
 
 		//allocate memory for the elements and scalars
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
-		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->B1 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->pub->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->a,		sbuffer, 0, 	RS_SCSZ);
-		rs = skipcopy( tmp->pub->B,	sbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->pub->B1,	sbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->pub->B2,	sbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->pub->P1,	sbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->pub->P2,	sbuffer, rs, 	RS_EPSZ);
+
 		*out = (void *) tmp; return;
 	}
 
@@ -321,13 +338,16 @@ namespace tnc25519{
 		tmp = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements
-		tmp->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->B1 = (unsigned char *)malloc( RS_EPSZ );
+		tmp->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P2 = (unsigned char *)malloc( RS_EPSZ );
 
-		rs = skipcopy( tmp->B,		pbuffer, 0, 	RS_EPSZ);
+		rs = skipcopy( tmp->B1,		pbuffer, 0, 	RS_EPSZ);
+		rs = skipcopy( tmp->B2,		pbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->P1,		pbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->P2,		pbuffer, rs, 	RS_EPSZ);
+
 		*out = (void *) tmp; return;
 	}
 
@@ -341,13 +361,14 @@ namespace tnc25519{
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->V = (unsigned char *)malloc( RS_EPSZ );
-		tmp->B = (unsigned char *)malloc( RS_EPSZ );
+		tmp->B1 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->s,		obuffer, 0, 	RS_SCSZ);
 		rs = skipcopy( tmp->x,		obuffer, rs, 	RS_SCSZ);
 		rs = skipcopy( tmp->U,		obuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->V,		obuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( tmp->B,		obuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->B1,		obuffer, rs, 	RS_EPSZ);
+
 		*out = (void *) tmp; return;
 	}
 
@@ -368,7 +389,8 @@ namespace tnc25519{
 		//key recast
 		struct pubkey *ri = (struct pubkey *)in;
 		//free up memory
-		free(ri->B);
+		free(ri->B1);
+		free(ri->B2);
 		free(ri->P1);
 		free(ri->P2);
 		free(ri); return;
@@ -387,7 +409,7 @@ namespace tnc25519{
 		free(ri->x);
 		free(ri->U);
 		free(ri->V);
-		free(ri->B);
+		free(ri->B1);
 		free(ri); return;
 	}
 
@@ -395,7 +417,8 @@ namespace tnc25519{
 	void secprint(void *in){
 		struct seckey *ri = (struct seckey *)in;
 		printf("a :"); ucbprint(ri->a, RS_SCSZ); printf("\n");
-		printf("B :"); ucbprint(ri->pub->B, RS_EPSZ); printf("\n");
+		printf("B1:"); ucbprint(ri->pub->B1, RS_EPSZ); printf("\n");
+		printf("B2:"); ucbprint(ri->pub->B2, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->pub->P1, RS_EPSZ); printf("\n");
 		printf("P2:"); ucbprint(ri->pub->P2, RS_EPSZ); printf("\n");
 		return;
@@ -403,7 +426,8 @@ namespace tnc25519{
 
 	void pubprint(void *in){
 		struct pubkey *ri = (struct pubkey *)in;
-		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
+		printf("B1:"); ucbprint(ri->B1, RS_EPSZ); printf("\n");
+		printf("B2:"); ucbprint(ri->B2, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->P1, RS_EPSZ); printf("\n");
 		printf("P2:"); ucbprint(ri->P2, RS_EPSZ); printf("\n");
 		return;
@@ -415,7 +439,7 @@ namespace tnc25519{
 		printf("x :"); ucbprint(ri->x, RS_SCSZ); printf("\n");
 		printf("U :"); ucbprint(ri->U, RS_EPSZ); printf("\n");
 		printf("V :"); ucbprint(ri->V, RS_EPSZ); printf("\n");
-		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
+		printf("B1:"); ucbprint(ri->B1, RS_EPSZ); printf("\n");
 		return;
 	}
 

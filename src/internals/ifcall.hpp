@@ -28,18 +28,20 @@
 
 #include "tnc25519/base.hpp"
 #include "sch25519/base.hpp"
+#include "tsc25519/base.hpp"
 
 const struct algostr *iftable[10] = {
 	&tnc25519::ftable,
 	NULL,
 	&sch25519::ftable,
+	&tsc25519::ftable,
 };
 
 #define A25519_TNC 		0
 #define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2	//TODO: not implemented
+#define A25519_SCHNORR 		2
+#define A25519_TSCHNORR		3
 #define A25519_TWINSCHNORR	3	//TODO: not implemented
-#define A25519_TIGHTSCHNORR	4	//TODO: not implemented
 #define A25519_RESETSCHNORR	5	//TODO: not implemented
 #define A25519_RESET2SCHNORR	6	//TODO: not implemented
 

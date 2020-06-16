@@ -35,8 +35,6 @@ namespace tnc25519{
 		&randomkey,
 		&signatgen,
 		&signatchk,
-		&hashexec,
-		&hashfree,
 		&secserial,
 		&pubserial,
 		&sigserial,

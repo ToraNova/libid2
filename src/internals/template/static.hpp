@@ -35,27 +35,27 @@
 #ifndef _<TEMPLATE>_STATIC_HPP_
 #define _<TEMPLATE>_STATIC_HPP_
 
-// Size definitions TODO: please edit NEPC and NSCC accordingly
-// for Curve25519 keys
-// -- NEPC - base/point components
-// -- NSSC - scalar components
-#define PKEY_NEPC 3
-#define PKEY_NSCC 0
-#define PKEY_SZ PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ
-// only define secrets here, ignore the pubkey element in skey
-#define SKEY_NEPC 0
-#define SKEY_NSCC 1
-#define SKEY_SZ PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ+ \
-		SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ
-#define SKEY_NC SKEY_NEPC+SKEY_NSCC+PKEY_NEPC+PKEY_NSCC
-// signature
-#define SGNT_NEPC 3
-#define SGNT_NSCC 2
-#define SGNT_SZ SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ
-
+#include "../cmacro.h"
 #include <stddef.h>
 
 namespace <TEMPLATE> {
+
+	// Size definitions TODO: please edit NEPC and NSCC accordingly
+	// for Curve25519 keys
+	// -- NEPC - base/point components
+	// -- NSSC - scalar components
+	const size_t PKEY_NEPC = 3;
+	const size_t PKEY_NSCC = 0;
+	const size_t PKEY_SZ = PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ;
+	// only define secrets here, ignore the pubkey element in skey
+	const size_t SKEY_NEPC = 0;
+	const size_t SKEY_NSCC = 1;
+	const size_t SKEY_SZ =  PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ+
+				SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ;
+	// signature
+	const size_t SGNT_NEPC = 3;
+	const size_t SGNT_NSCC = 2;
+	const size_t SGNT_SZ = SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ;
 
 	struct pubkey{
 		unsigned char *B;
@@ -95,7 +95,7 @@ namespace <TEMPLATE> {
 		unsigned char *mbuffer, size_t mlen
 	);
 
-	// hash( m, u, v) to a scalar in ristretto255
+	//hashexec (internal)
 	// output is always size RS_SCSZ
 	unsigned char *hashexec(
 		unsigned char *mbuffer, size_t mlen,

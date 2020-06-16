@@ -23,7 +23,7 @@ cd debug && ../configure --prefix=/debug
 ```
 OR
 ```
-../configure CPPFLAGS="-DDEBUG" CFLAGS="-g -O0"
+../configure CPPFLAGS="-DDEBUG" CFLAGS="-DDEBUG -g -O0"
 ```
 
 ### Supported IBI Schemes
@@ -33,6 +33,7 @@ The deprecated version of the library found under the deprecate directory suppor
 	1. TNC-Schnorr IBI
 	2. CLI (Certificateless Identification)
 	3. Schnorr IBI
+	4. Tight Schnorr
 
 ### Supported Signature Schemes
 Likewise, the deprecated version supports 3 schemes while the renewed currently only supports 1.
@@ -40,3 +41,4 @@ Likewise, the deprecated version supports 3 schemes while the renewed currently 
 #### Using Ristretto Curve25519
 	1. TNC-Schnorr
 	2. Schnorr
+	3. Tight-Schnorr

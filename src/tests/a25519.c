@@ -9,11 +9,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #define PORT 8051
 
 #define str_publicfile 	"public"
 #define str_secretfile 	"secret"
-#define str_idfile 	"userid.txt"
+#define str_idfile 	"id.txt"
 #define str_uskfile 	"user.key"
 
 #define int_testcnt 10000
@@ -295,9 +298,30 @@ int main(int argc, char *argv[]){
 					printf("verify /%d: %f ms\n", int_testcnt, cpu_time_use2 );
 
 					free(sbuf); free(pbuf); free(obuf);
+				}else if( strcmp(argv[3],"of") == 0){
+					//correctness and memory test
+					unsigned char mbuf[1024];
+					int fd = open("/dev/urandom", O_RDONLY);
+
+					for( i=0; i< int_testcnt; i++){
+						read(fd, mbuf, 1024);
+						a25519_keygen(algo, &pbuf, &plen, &sbuf, &slen);
+						a25519_sig_sign(algo, sbuf, slen, mbuf, 1024, &obuf, &olen);
+						rc = a25519_sig_verify(algo, pbuf, plen, mbuf, 1024, obuf, olen);
+						if(rc != 0){
+							printf("Invalid signature on iter. %u\n",i);
+							break;
+						}
+						rc = a25519_test_offline(algo, pbuf, plen, mbuf, 1024, obuf, olen);
+						if(rc != 0){
+							printf("Invalid offline proto on iter. %u\n",i);
+							break;
+						}
+					}
+					printf("offline full test done iter. %u\n",i);
 				}
 			}else{
-				lerror("Please specify either <prove|verify|signat> for runtest !\n");
+				lerror("Please specify either <prove|verify|signat|of> for runtest !\n");
 				return 1;
 			}
 		}else{
