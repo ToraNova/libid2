@@ -86,16 +86,13 @@ namespace tnc25519{
 		crypto_core_ristretto255_scalar_random( tmp->a );
 		crypto_core_ristretto255_random( tmp->pub->B );
 
-		rc = crypto_scalarmult_ristretto255(
+		rc = 0;
+		rc += crypto_scalarmult_ristretto255(
 				tmp->pub->P1,
 				tmp->a,
 				tmp->pub->B
 				); // P1 = aB
-		if( rc != 0 ){ //abort if fail
-			*out = NULL; return;
-		}
-
-		rc = crypto_scalarmult_ristretto255(
+		rc += crypto_scalarmult_ristretto255(
 				tmp->pub->P2,
 				tmp->a,
 				tmp->pub->P1
@@ -127,27 +124,16 @@ namespace tnc25519{
 		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
 		crypto_core_ristretto255_scalar_random(nonce);
 
-		rc = crypto_scalarmult_ristretto255(
-				tmp->U,
-				nonce,
-				key->pub->B
-				); // U = rB
-		if( rc != 0 ){ //abort if fail
-			*out = NULL; return;
-		}
-
-		rc = crypto_scalarmult_ristretto255(
-				tmp->V,
-				nonce,
-				key->pub->P1
-				); // V = rP1
+		rc = 0;
+		// U = rB ; V = rP1
+		rc += crypto_scalarmult_ristretto255(tmp->U,nonce,key->pub->B);
+		rc += crypto_scalarmult_ristretto255( tmp->V, nonce, key->pub->P1);
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
 		}
 
 		//store B on the signature
 		memcpy( tmp->B, key->pub->B, RS_EPSZ );
-
 		tmp->x = hashexec(mbuffer, mlen, tmp->U, tmp->V);
 
 		// s = r + xa
@@ -173,35 +159,15 @@ namespace tnc25519{
 		unsigned char *xp;
 
 		// U' = sB - xP1
-		rc = crypto_scalarmult_ristretto255(
-				tmp1,
-				sig->s,
-				par->B
-				);
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255(
-				tmp2,
-				sig->x,
-				par->P1
-				);
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_sub( tmp3, tmp1, tmp2 ); //tmp3 U'
-		if( rc != 0 ) return rc; //abort if fail
+		rc = 0;
+		rc += crypto_scalarmult_ristretto255(tmp1,sig->s,par->B);
+		rc += crypto_scalarmult_ristretto255(tmp2,sig->x,par->P1);
+		rc += crypto_core_ristretto255_sub( tmp3, tmp1, tmp2 ); //tmp3 U'
 
 		// V' = sP1 - xP2
-		rc = crypto_scalarmult_ristretto255(
-				tmp1,
-				sig->s,
-				par->P1
-				);
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255(
-				tmp2,
-				sig->x,
-				par->P2
-				);
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_sub( tmp2, tmp1, tmp2 ); //tmp4 V'
+		rc += crypto_scalarmult_ristretto255(tmp1,sig->s,par->P1);
+		rc += crypto_scalarmult_ristretto255(tmp2,sig->x,par->P2);
+		rc += crypto_core_ristretto255_sub( tmp2, tmp1, tmp2 ); //tmp4 V'
 		if( rc != 0 ) return rc; //abort if fail
 
 		xp = hashexec(mbuffer, mlen, tmp3, tmp2);

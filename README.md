@@ -30,15 +30,15 @@ OR
 The deprecated version of the library found under the deprecate directory supports 3 schemes. This renewed version currently only supports 2.
 
 #### Using Ristretto Curve25519
-	1. TNC-Schnorr IBI
-	2. CLI (Certificateless Identification)
-	3. Schnorr IBI
-	4. Tight Schnorr
+	0. TNC-Schnorr IBI
+	1. CLI (Certificateless Identification)
+	2. Schnorr IBI
+	3. Tight Schnorr
+	4. Twin Schnorr
 
 ### Supported Signature Schemes
 Likewise, the deprecated version supports 3 schemes while the renewed currently only supports 1.
 
 #### Using Ristretto Curve25519
-	1. TNC-Schnorr
-	2. Schnorr
-	3. Tight-Schnorr
+	0. TNC-Schnorr
+	1. Schnorr

@@ -1,5 +1,5 @@
 /*
- * internals/ifcall.hpp - id2 library
+ * internals/twn25519/base.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,28 +23,34 @@
  * SOFTWARE.
  */
 
-#ifndef _IFCALL_HPP_
-#define _IFCALL_HPP_
+#ifndef _TWN25519_BASE_HPP_
+#define _TWN25519_BASE_HPP_
 
-#include "tnc25519/base.hpp"
-#include "sch25519/base.hpp"
-#include "tsc25519/base.hpp"
-#include "twn25519/base.hpp"
+#include "../internal.hpp"
+#include "static.hpp"
+#include "proto.hpp"
 
-const struct algostr *iftable[10] = {
-	&tnc25519::ftable,
-	NULL,
-	&sch25519::ftable,
-	&tsc25519::ftable,
-	&twn25519::ftable,
-};
-
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2
-#define A25519_TSCHNORR		3
-#define A25519_TWINSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
+namespace twn25519{
+	const struct algostr ftable = {
+		&randomkey,
+		&signatgen,
+		&signatchk,
+		&secserial,
+		&pubserial,
+		&sigserial,
+		&secstruct,
+		&pubstruct,
+		&sigstruct,
+		&secdestroy,
+		&pubdestroy,
+		&sigdestroy,
+		&secprint,
+		&pubprint,
+		&sigprint,
+		&signatprv,
+		&signatvrf,
+		&prototest
+	};
+}
 
 #endif

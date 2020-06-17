@@ -140,7 +140,8 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_libid2_la_OBJECTS = internals/proto.lo internals/tnc25519/static.lo \
 	internals/tnc25519/proto.lo internals/sch25519/static.lo \
 	internals/sch25519/proto.lo internals/tsc25519/static.lo \
-	internals/tsc25519/proto.lo a25519.lo a25519.c.lo \
+	internals/tsc25519/proto.lo internals/twn25519/static.lo \
+	internals/twn25519/proto.lo a25519.lo a25519.c.lo \
 	utils/simplesock.lo utils/jbase64.lo utils/asn1util.lo \
 	utils/futil.lo utils/bufhelp.lo
 libid2_la_OBJECTS = $(am_libid2_la_OBJECTS)
@@ -177,6 +178,8 @@ am__depfiles_remade = ./$(DEPDIR)/a25519.Plo ./$(DEPDIR)/a25519.c.Plo \
 	internals/tnc25519/$(DEPDIR)/static.Plo \
 	internals/tsc25519/$(DEPDIR)/proto.Plo \
 	internals/tsc25519/$(DEPDIR)/static.Plo \
+	internals/twn25519/$(DEPDIR)/proto.Plo \
+	internals/twn25519/$(DEPDIR)/static.Plo \
 	tests/$(DEPDIR)/a25519.Po utils/$(DEPDIR)/asn1util.Plo \
 	utils/$(DEPDIR)/bufhelp.Plo utils/$(DEPDIR)/futil.Plo \
 	utils/$(DEPDIR)/jbase64.Plo utils/$(DEPDIR)/simplesock.Plo
@@ -375,6 +378,7 @@ libid2_la_SOURCES = internals/proto.cpp \
 		internals/tnc25519/static.cpp internals/tnc25519/proto.cpp \
 		internals/sch25519/static.cpp internals/sch25519/proto.cpp \
 		internals/tsc25519/static.cpp internals/tsc25519/proto.cpp \
+		internals/twn25519/static.cpp internals/twn25519/proto.cpp \
 		a25519.cpp a25519.c.cpp \
 		utils/simplesock.c utils/jbase64.c utils/asn1util.c \
 		utils/futil.c utils/bufhelp.c
@@ -500,6 +504,16 @@ internals/tsc25519/static.lo: internals/tsc25519/$(am__dirstamp) \
 	internals/tsc25519/$(DEPDIR)/$(am__dirstamp)
 internals/tsc25519/proto.lo: internals/tsc25519/$(am__dirstamp) \
 	internals/tsc25519/$(DEPDIR)/$(am__dirstamp)
+internals/twn25519/$(am__dirstamp):
+	@$(MKDIR_P) internals/twn25519
+	@: > internals/twn25519/$(am__dirstamp)
+internals/twn25519/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) internals/twn25519/$(DEPDIR)
+	@: > internals/twn25519/$(DEPDIR)/$(am__dirstamp)
+internals/twn25519/static.lo: internals/twn25519/$(am__dirstamp) \
+	internals/twn25519/$(DEPDIR)/$(am__dirstamp)
+internals/twn25519/proto.lo: internals/twn25519/$(am__dirstamp) \
+	internals/twn25519/$(DEPDIR)/$(am__dirstamp)
 utils/$(am__dirstamp):
 	@$(MKDIR_P) utils
 	@: > utils/$(am__dirstamp)
@@ -541,6 +555,8 @@ mostlyclean-compile:
 	-rm -f internals/tnc25519/*.lo
 	-rm -f internals/tsc25519/*.$(OBJEXT)
 	-rm -f internals/tsc25519/*.lo
+	-rm -f internals/twn25519/*.$(OBJEXT)
+	-rm -f internals/twn25519/*.lo
 	-rm -f tests/*.$(OBJEXT)
 	-rm -f utils/*.$(OBJEXT)
 	-rm -f utils/*.lo
@@ -557,6 +573,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@internals/tnc25519/$(DEPDIR)/static.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@internals/tsc25519/$(DEPDIR)/proto.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@internals/tsc25519/$(DEPDIR)/static.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@internals/twn25519/$(DEPDIR)/proto.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@internals/twn25519/$(DEPDIR)/static.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/a25519.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/asn1util.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/bufhelp.Plo@am__quote@ # am--include-marker
@@ -627,6 +645,7 @@ clean-libtool:
 	-rm -rf internals/sch25519/.libs internals/sch25519/_libs
 	-rm -rf internals/tnc25519/.libs internals/tnc25519/_libs
 	-rm -rf internals/tsc25519/.libs internals/tsc25519/_libs
+	-rm -rf internals/twn25519/.libs internals/twn25519/_libs
 	-rm -rf utils/.libs utils/_libs
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
@@ -776,6 +795,8 @@ distclean-generic:
 	-rm -f internals/tnc25519/$(am__dirstamp)
 	-rm -f internals/tsc25519/$(DEPDIR)/$(am__dirstamp)
 	-rm -f internals/tsc25519/$(am__dirstamp)
+	-rm -f internals/twn25519/$(DEPDIR)/$(am__dirstamp)
+	-rm -f internals/twn25519/$(am__dirstamp)
 	-rm -f tests/$(DEPDIR)/$(am__dirstamp)
 	-rm -f tests/$(am__dirstamp)
 	-rm -f utils/$(DEPDIR)/$(am__dirstamp)
@@ -799,6 +820,8 @@ distclean: distclean-am
 	-rm -f internals/tnc25519/$(DEPDIR)/static.Plo
 	-rm -f internals/tsc25519/$(DEPDIR)/proto.Plo
 	-rm -f internals/tsc25519/$(DEPDIR)/static.Plo
+	-rm -f internals/twn25519/$(DEPDIR)/proto.Plo
+	-rm -f internals/twn25519/$(DEPDIR)/static.Plo
 	-rm -f tests/$(DEPDIR)/a25519.Po
 	-rm -f utils/$(DEPDIR)/asn1util.Plo
 	-rm -f utils/$(DEPDIR)/bufhelp.Plo
@@ -859,6 +882,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f internals/tnc25519/$(DEPDIR)/static.Plo
 	-rm -f internals/tsc25519/$(DEPDIR)/proto.Plo
 	-rm -f internals/tsc25519/$(DEPDIR)/static.Plo
+	-rm -f internals/twn25519/$(DEPDIR)/proto.Plo
+	-rm -f internals/twn25519/$(DEPDIR)/static.Plo
 	-rm -f tests/$(DEPDIR)/a25519.Po
 	-rm -f utils/$(DEPDIR)/asn1util.Plo
 	-rm -f utils/$(DEPDIR)/bufhelp.Plo

@@ -1,5 +1,5 @@
 /*
- * internals/<TEMPLATE>/proto.cpp - id2 library
+ * internals/tnc25519/proto.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * <TEMPLATE> :TODO please edit the description
+ * TNC signature scheme key conversion functions
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -53,7 +53,7 @@
 #include <cstdio>
 #include <cstring>
 
-namespace <TEMPLATE>{
+namespace tnc25519{
 
 	int signatprv(
 		int sock,
@@ -65,9 +65,9 @@ namespace <TEMPLATE>{
 		struct signat *usk = (struct signat *)vusk;
 		int rc;
 
-		//--------------------------TODO START
+		//------------------------------------TODO START
+
 		unsigned char t[RS_SCSZ], c[RS_SCSZ], y[RS_SCSZ];
-		unsigned char tmp[RS_SCSZ] = {0};
 		unsigned char buf[TS_MAXSZ] = {0};
 
 		//sample t (commit secret)
@@ -98,8 +98,8 @@ namespace <TEMPLATE>{
 
 		//--------------COMPUTE AND SEND RESPONSE
 		// y = t + cs
-		crypto_core_ristretto255_scalar_mul( tmp, c, usk->s ); //
-		crypto_core_ristretto255_scalar_add( y, tmp, t );
+		crypto_core_ristretto255_scalar_mul( y, c, usk->s ); //
+		crypto_core_ristretto255_scalar_add( y, y, t );
 
 #ifdef DEBUG
 	sigprint(usk);
@@ -111,7 +111,7 @@ namespace <TEMPLATE>{
 
 		//PREVENT RESET ATTACKS, clear the commit
 		memset(t, 0, RS_SCSZ); //zero t
-		memset(buf, 0, 3*RS_EPSZ); //zero U,V and T
+		memset(buf, 0, TS_MAXSZ); //zero U,V and T
 		sendbuf(sock, (char *)y , RS_SCSZ);
 
 		buf[0] = 0x01;
@@ -121,8 +121,10 @@ namespace <TEMPLATE>{
 			return 1;
 		}
 		debug("Received: %02X\n",buf[0]);
-		//--------------------------TODO END
 
+		//------------------------------------TODO END
+
+		//return OK
 		return (int) buf[0];
 	}
 
@@ -133,10 +135,9 @@ namespace <TEMPLATE>{
 	){
 		//socket check and key recast
 		if(sock == -1){return 1;}
-		struct pubkey *par = (struct pubkey *)vpar;
-		int rc;
+		struct pubkey *par = (struct pubkey *)vpar; int rc;
 
-		//--------------------------TODO START
+		//------------------------------------TODO START
 		unsigned char c[RS_SCSZ], y[RS_SCSZ], *xp;
 		unsigned char LHS[RS_EPSZ], RHS[RS_EPSZ];
 		unsigned char tmp1[RS_EPSZ], tmp2[RS_EPSZ];
@@ -179,21 +180,18 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 #endif
 
 		// yB = T + c( U' - xP1 )
-		rc = crypto_scalarmult_ristretto255( tmp1, xp, par->P1); // xP1
+		rc = 0;
+		rc += crypto_scalarmult_ristretto255( tmp1, xp, par->P1); // xP1
 		//zero and free
 		hashfree(xp);
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_add( tmp2, buf, tmp1); // U' - xP1
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255( tmp1, c, tmp2); // c( U' - xP1 )
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_add( RHS, tmp1, buf+2*RS_EPSZ);// T + c(U' - xP1)
-		if( rc != 0 ) return rc; //abort if fail
+		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
+		rc += crypto_core_ristretto255_add( tmp2, buf, tmp1); // U' - xP1
+		rc += crypto_scalarmult_ristretto255( tmp1, c, tmp2); // c( U' - xP1 )
+		// T + c(U' - xP1)
+		rc += crypto_core_ristretto255_add( RHS, tmp1, buf+2*RS_EPSZ);
 
 		//check if tmp is equal to x from obuffer
-		rc = crypto_verify_32( LHS, RHS );
+		rc += crypto_verify_32( LHS, RHS );
 		if( rc == 0 ){
 			buf[0] = 0x00;
 		}else{
@@ -201,12 +199,11 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 		}
 		sendbuf(sock, (char *)buf , 1); //send back the results
 		debug("Replied: %02X\n",buf[0]);
-		//--------------------------TODO END
+		//------------------------------------TODO END
 
-		return rc;
+		//return rc;
+		return 1;
 	}
-
-//general (non client or server namespace)
 
 	int prototest(
 		void *vpar,
@@ -218,8 +215,7 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 		struct signat *usk = (struct signat *)vusk;
 		int rc;
 
-		//--------------------------TODO START
-		unsigned char tmp[RS_EPSZ];
+		//------------------------------------TODO START
 		unsigned char t[RS_SCSZ], c[RS_SCSZ], y[RS_SCSZ], *xp;
 		unsigned char tmp1[RS_EPSZ], LHS[RS_EPSZ], RHS[RS_EPSZ], tmp2[RS_EPSZ];
 
@@ -229,32 +225,30 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 		crypto_core_ristretto255_scalar_random(c);
 
 		//compute response
-		crypto_core_ristretto255_scalar_mul( tmp , c, usk->s ); //
-		crypto_core_ristretto255_scalar_add( y, tmp, t ); // y = t + cs
+		crypto_core_ristretto255_scalar_mul( y , c, usk->s ); //
+		crypto_core_ristretto255_scalar_add( y, y, t ); // y = t + cs
 
 		xp = hashexec(mbuffer, mlen, usk->U, usk->V);
 
-		//T = tB
-		rc = crypto_scalarmult_ristretto255( tmp, t, usk->B);
-
 		// yB = T + c( U' - xP1 )
-		rc = crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255( tmp1, xp, par->P1); // xP1
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_add( tmp2, usk->U, tmp1); // U' - xP1
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255( tmp1, c, tmp2); // c( U' - xP1 )
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_add( RHS, tmp1, tmp); // T + c(U' - xP1)
+		rc = 0;
+		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
+		rc += crypto_scalarmult_ristretto255( tmp1, xp, par->P1); // xP1
+		hashfree(xp);
+		rc += crypto_core_ristretto255_add( tmp2, usk->U, tmp1); // U' - xP1
+		rc += crypto_scalarmult_ristretto255( tmp1, c, tmp2); // c( U' - xP1 )
+
+		//T = tB
+		rc += crypto_scalarmult_ristretto255( tmp2, t, usk->B);
+
+		// T + c(U' - xP1)
+		rc += crypto_core_ristretto255_add( RHS, tmp1, tmp2);
 		if( rc != 0 ) return rc; //abort if fail
 
 		//check LHS == RHS
 		rc = crypto_verify_32( LHS, RHS );
 
-		hashfree(xp);
-		//--------------------------TODO END
-
+		//------------------------------------TODO END
 		return rc;
 	}
 

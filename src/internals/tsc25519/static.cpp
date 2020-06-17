@@ -225,7 +225,10 @@ namespace tsc25519{
 
 		//free any allocated stuff
 		hashfree(xp);
-		return rc;
+
+		//TODO: figure if this is actually safe or not
+		//SET TO ALWAYS FAIL FOR NOW
+		return 1;
 	}
 
 	unsigned char *hashexec(
