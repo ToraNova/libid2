@@ -27,18 +27,20 @@ OR
 ```
 
 ### Supported IBI Schemes
-The deprecated version of the library found under the deprecate directory supports 3 schemes. This renewed version currently only supports 2.
+The latest version supports 7 identity-based identification schemes. The deprecated version supports an [IBI using BLS signatures](https://ieeexplore.ieee.org/document/9049156)
 
 #### Using Ristretto Curve25519
-	0. TNC-Schnorr IBI
-	1. CLI (Certificateless Identification)
-	2. Schnorr IBI
-	3. Tight Schnorr
-	4. Twin Schnorr
+0. TNC-Schnorr IBI
+1. CLI (Certificateless Identification)
+2. Schnorr-IBI
+3. [Tight-Schnorr](https://www.researchgate.net/publication/221317622_A_Variant_of_Schnorr_Identity-Based_Identification_Scheme_with_Tight_Reduction)
+4. [Twin-Schnorr](https://www.hindawi.com/journals/tswj/2015/237514/)
+5. [Reset-secure Schnorr](https://www.researchgate.net/publication/286842222_Reset-Secure_Identity-Based_Identification_Schemes_Without_Pairings)
+6. [Reset-secure Twin-Schnorr](https://www.researchgate.net/publication/286842222_Reset-Secure_Identity-Based_Identification_Schemes_Without_Pairings)
 
 ### Supported Signature Schemes
-Likewise, the deprecated version supports 3 schemes while the renewed currently only supports 1.
+The latest version supports 2 signature schemes, TNC-Schnorr and Schnorr signatures on Ristretto25519. The deprecated version supports BLS signatures based on TightBLS using libpbc.
 
 #### Using Ristretto Curve25519
-	0. TNC-Schnorr
-	1. Schnorr
+0. TNC-Schnorr
+1. Schnorr
