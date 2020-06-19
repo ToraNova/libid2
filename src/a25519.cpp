@@ -387,12 +387,17 @@ namespace test{
 		start = clock();
 		for(i=0; i<count;i++){
 			rc = ibi::prove(a, mbuffer, mlen, obuffer, olen, tsock );
+			if(rc!=0){
+				lerror("Invalid run:%u, rc=%d\n",i,rc);
+				break;
+			}
 		}
 		end = clock();
 		cpu_time_use = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000; //record time
 		printf("%d proves took total %.4f ms, ", count, cpu_time_use);
 		cpu_time_use = cpu_time_use / count; //average it
 		printf("average: %.4f ms\n", cpu_time_use);
+		if(i==count) printf("All runs OK\n");
 		close(tsock);
 	}
 
@@ -432,6 +437,10 @@ namespace test{
 		start = clock();
 		for(i = 0; i < count; i++){
 			rc = ibi::verify(a, pbuffer, plen, &mbuffer, &mlen, csock );
+			if(rc!=0){
+				lerror("Invalid run:%u, rc=%d\n",i,rc);
+				break;
+			}
 			//callback(rc, csock, mbuffer, mlen ); //runs the callback func
 		}
 		end = clock();
@@ -441,6 +450,7 @@ namespace test{
 		printf("%d verifications took total %.4f ms, ", count, cpu_time_use);
 		cpu_time_use = cpu_time_use / count; //average it
 		printf("average: %.4f ms\n", cpu_time_use);
+		if(i==count) printf("All runs OK\n");
 
 		close(csock);
 	}

@@ -69,13 +69,12 @@ namespace tnc25519{
 
 	void randomkey(void **out){
 		int rc;
-		//declare and allocate memory for key
+		//declare and allocate memory for skey and pubkey
 		struct seckey *tmp;
 		tmp = (struct seckey *)malloc( sizeof(struct seckey) );
-
-		//allocate memory for pubkey
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
+		//-------------------------------------TODO START EDIT
 		//allocate memory for the elements and scalars
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
 		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
@@ -100,6 +99,7 @@ namespace tnc25519{
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
 		}
+		//-------------------------------------TODO END EDIT
 
 		*out = (void *) tmp; return;
 	}
@@ -114,6 +114,7 @@ namespace tnc25519{
 		struct signat *tmp = (struct signat *)malloc(sizeof(struct signat));
 		int rc; unsigned char nonce[RS_SCSZ];
 
+		//-------------------------------------TODO START EDIT
 		//allocate for components
 		tmp->s = (unsigned char *)malloc( RS_SCSZ );
 		//tmp->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
@@ -140,6 +141,7 @@ namespace tnc25519{
 		crypto_core_ristretto255_scalar_mul( tmp->s , tmp->x, key->a );
 		crypto_core_ristretto255_scalar_add( tmp->s, tmp->s, nonce );
 
+		//-------------------------------------TODO END EDIT
 		*out = (void *) tmp; return;
 	}
 
@@ -153,6 +155,7 @@ namespace tnc25519{
 		struct signat *sig = (struct signat *)vsig;
 		int rc;
 
+		//-------------------------------------TODO START EDIT
 		unsigned char tmp1[RS_EPSZ]; //tmp array
 		unsigned char tmp2[RS_EPSZ]; //tmp array
 		unsigned char tmp3[RS_EPSZ]; //tmp array
@@ -182,10 +185,10 @@ namespace tnc25519{
 		printf("U':"); ucbprint(tmp3, RS_EPSZ); printf("\n");
 		printf("V':"); ucbprint(tmp2, RS_EPSZ); printf("\n");
 #endif
-
 		//free any allocated stuff
 		hashfree(xp);
 
+		//-------------------------------------TODO START EDIT
 		return rc;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * internals/ifcall.hpp - id2 library
+ * internals/rss25519/proto.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -23,30 +23,43 @@
  * SOFTWARE.
  */
 
-#ifndef _IFCALL_HPP_
-#define _IFCALL_HPP_
+/*
+ * TODO: please edit description
+ *
+ * ToraNova 2020
+ * chia_jason96@live.com
+ *
+ * this is (mainly) for internal use only!
+ */
 
-#include "tnc25519/base.hpp"
-#include "sch25519/base.hpp"
-#include "tsc25519/base.hpp"
-#include "twn25519/base.hpp"
-#include "rss25519/base.hpp"
+#ifndef _RSS25519_PROTO_HPP_
+#define _RSS25519_PROTO_HPP_
 
-const struct algostr *iftable[10] = {
-	&tnc25519::ftable,
-	NULL,
-	&sch25519::ftable,
-	&tsc25519::ftable,
-	&twn25519::ftable,
-	&rss25519::ftable,
-};
+#include <stddef.h>
+#include "static.hpp"
 
-#define A25519_TNC 		0
-#define A25519_CLI 		1	//TODO: not implemented
-#define A25519_SCHNORR 		2
-#define A25519_TSCHNORR		3
-#define A25519_TWINSCHNORR	4	//TODO: not implemented
-#define A25519_RESETSCHNORR	5	//TODO: not implemented
-#define A25519_RESET2SCHNORR	6	//TODO: not implemented
+namespace rss25519 {
+
+	//prove existence of usk without revealing
+	int signatprv(
+		int sock,
+		void *vusk,
+		unsigned char *mbuffer, size_t mlen
+	);
+
+	//verify existence of usk of particular mbuffer(ID)
+	int signatvrf(
+		int sock,
+		void *vpar,
+		unsigned char *mbuffer, size_t mlen
+	);
+
+	// an auxiliary function to test param and usk
+	int prototest(
+		void *vpar,
+		void *vusk,
+		unsigned char *mbuffer, size_t mlen
+	);
+}
 
 #endif
