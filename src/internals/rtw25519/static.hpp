@@ -1,5 +1,5 @@
 /*
- * internals/rss25519/static.hpp - id2 library
+ * internals/rtw25519/static.hpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -24,7 +24,7 @@
  */
 
 /*
- * TODO: please edit description
+ * Reset secure Twin Schnorr IBI
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -32,44 +32,48 @@
  * this is for internal use only!
  */
 
-#ifndef _RSS25519_STATIC_HPP_
-#define _RSS25519_STATIC_HPP_
+#ifndef _RTW25519_STATIC_HPP_
+#define _RTW25519_STATIC_HPP_
 
 #include "../cmacro.h"
 #include <stddef.h>
 
-namespace rss25519 {
+namespace rtw25519 {
 
 	// Size definitions TODO: please edit NEPC and NSCC accordingly
-	const size_t PKEY_NEPC = 3;
+	const size_t PKEY_NEPC = 4;
 	const size_t PKEY_NSCC = 0;
 	const size_t PKEY_SZ = PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ;
 	const size_t SKEY_NEPC = 0;
-	const size_t SKEY_NSCC = 1;
+	const size_t SKEY_NSCC = 2;
 	const size_t SKEY_SZ =  PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ+
 				SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ;
-	const size_t SGNT_NEPC = 3;
-	const size_t SGNT_NSCC = 2;
+	const size_t SGNT_NEPC = 4;
+	const size_t SGNT_NSCC = 3;
 	const size_t SGNT_SZ = SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ;
 
 	struct pubkey{
-		unsigned char *B;
+		unsigned char *B1;
+		unsigned char *B2;
 		unsigned char *P1;
 		unsigned char *P2;
 	};
 
 	struct seckey{
-		unsigned char *a;
+		unsigned char *a1;
+		unsigned char *a2;
 		struct pubkey *pub;
 	};
 
 	struct signat{
 		//scalars
-		unsigned char *s;
+		unsigned char *s1;
+		unsigned char *s2;
 		unsigned char *x;
 		//points
 		unsigned char *U;
-		unsigned char *B;
+		unsigned char *B1;
+		unsigned char *B2;
 		unsigned char *P2;
 	};
 

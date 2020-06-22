@@ -1,5 +1,5 @@
 /*
- * internals/rss25519/proto.cpp - id2 library
+ * internals/rtw25519/proto.cpp - id2 library
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Chia Jason
@@ -53,7 +53,7 @@
 #include <cstdio>
 #include <cstring>
 
-namespace rss25519{
+namespace rtw25519{
 
 	int signatprv(
 		int sock,
@@ -66,8 +66,8 @@ namespace rss25519{
 		int rc;
 
 		//--------------------------TODO START
-		unsigned char t[2*RS_SCSZ], c[RS_SCSZ], y[RS_SCSZ];
-		unsigned char *xp;
+		unsigned char t[2*RS_SCSZ], c[RS_SCSZ], y[2*RS_SCSZ];
+		unsigned char *xp1, *xp2;
 		unsigned char tmp1[RS_EPSZ], tmp2[RS_EPSZ], tmp[RS_SCSZ];
 		unsigned char buf[TS_MAXSZ] = {0};
 
@@ -79,16 +79,21 @@ namespace rss25519{
 			return 1;
 		}
 
-		//COMPUTE NONCE WITH PRE-NONCE AS SEED
-		randombytes_buf(y, RS_EPSZ);
-		xp = hashexec( mbuffer, mlen, y, c);
 
 		//--------------------------------------------------------
-		//--------------COMPUTE AND SEND COMMIT
+		//--------------COMPUTE AND SEND COMMIT USING PRE_NONCE
 		//CMT <- U', T
 		// T = tB
 		memcpy( buf, usk->U, RS_EPSZ);
-		rc = crypto_scalarmult_ristretto255( buf+RS_EPSZ, xp, usk->B);
+		rc = 0;
+
+		randombytes_buf(y, 2*RS_EPSZ);
+		xp1 = hashexec( mbuffer, mlen, y, c);
+		xp2 = hashexec( mbuffer, mlen, y+RS_SCSZ, c);
+		rc += crypto_scalarmult_ristretto255( tmp1, xp1, usk->B1);
+		rc += crypto_scalarmult_ristretto255( tmp2, xp2, usk->B2);
+		rc += crypto_core_ristretto255_add( buf+RS_EPSZ, tmp1, tmp2);
+
 		if( rc != 0 ){
 			//abort if fail
 			lerror("Failed to compute COMMIT\n");
@@ -107,7 +112,7 @@ namespace rss25519{
 		//--------------------------------------------------------
 		//--------------VERIFY REVEAL
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( tmp1, t, usk->B); //fixed
+		rc += crypto_scalarmult_ristretto255( tmp1, t, usk->B1); //fixed
 		rc += crypto_scalarmult_ristretto255( tmp2, t+RS_SCSZ, usk->P2);//rH
 		rc += crypto_core_ristretto255_add( tmp, tmp1, tmp2);
 		rc += crypto_verify_32(tmp, c);
@@ -122,27 +127,32 @@ namespace rss25519{
 	printf("c':"); ucbprint(tmp, RS_SCSZ); printf("\n");
 #endif
 			//send back garbage
-			sendbuf(sock, (char *)y , RS_SCSZ);
+			sendbuf(sock, (char *)y , 2*RS_SCSZ);
 			return 1;
 		}
 
 		//--------------COMPUTE AND SEND RESPONSE
 		// y = t + cs
-		crypto_core_ristretto255_scalar_mul( y, c, usk->s ); //
-		crypto_core_ristretto255_scalar_add( y, y, xp );
+		crypto_core_ristretto255_scalar_mul( y, c, usk->s1 ); //
+		crypto_core_ristretto255_scalar_add( y, y, xp1 );
+		crypto_core_ristretto255_scalar_mul( y+RS_SCSZ, c, usk->s2 ); //
+		crypto_core_ristretto255_scalar_add( y+RS_SCSZ, y+RS_SCSZ, xp2 );
 
 #ifdef DEBUG
 	sigprint(usk);
-	printf("t :"); ucbprint(xp, RS_SCSZ); printf("\n");
+	printf("t1:"); ucbprint(xp1, RS_SCSZ); printf("\n");
+	printf("t2:"); ucbprint(xp2, RS_SCSZ); printf("\n");
 	printf("T :"); ucbprint(buf+RS_EPSZ, RS_EPSZ); printf("\n");
 	printf("C1:"); ucbprint(tmp1, RS_SCSZ); printf("\n");
 	printf("C2:"); ucbprint(tmp2, RS_SCSZ); printf("\n");
 	printf("c :"); ucbprint(c, RS_SCSZ); printf("\n");
-	printf("y :"); ucbprint(y, RS_SCSZ); printf("\n");
+	printf("y1:"); ucbprint(y, RS_SCSZ); printf("\n");
+	printf("y2:"); ucbprint(y+RS_SCSZ, RS_SCSZ); printf("\n");
 #endif
 
-		hashfree(xp);
-		sendbuf(sock, (char *)y , RS_SCSZ);
+		hashfree(xp1);
+		hashfree(xp2);
+		sendbuf(sock, (char *)y , 2*RS_SCSZ);
 
 		buf[0] = 0x01;
 		rc = fixed_recvbuf(sock, (char *)buf, 1); //receive final result
@@ -168,7 +178,7 @@ namespace rss25519{
 
 		//--------------------------TODO START
 		unsigned char pc[2*RS_SCSZ];
-		unsigned char c[RS_SCSZ], y[RS_SCSZ], *xp;
+		unsigned char c[RS_SCSZ], y[2*RS_SCSZ], *xp;
 		unsigned char LHS[RS_EPSZ], RHS[RS_EPSZ];
 		unsigned char buf[TS_MAXSZ] = {0};
 
@@ -177,7 +187,7 @@ namespace rss25519{
 		crypto_core_ristretto255_scalar_random(pc); //m
 		crypto_core_ristretto255_scalar_random(pc+RS_SCSZ); //r
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, pc, par->B );//mB
+		rc += crypto_scalarmult_ristretto255( LHS, pc, par->B1 );//mB
 		rc += crypto_scalarmult_ristretto255( RHS, pc+RS_SCSZ, par->P2 );//rH
 		rc += crypto_core_ristretto255_add( c, LHS, RHS ); //compute pre-nonce
 		if( rc != 0 ) return rc; //abort if fail
@@ -199,7 +209,7 @@ namespace rss25519{
 
 		//--------------------------------------------------------
 		//---------------------RECEIVE RESPONSE
-		rc = fixed_recvbuf(sock, (char *)y, RS_SCSZ);
+		rc = fixed_recvbuf(sock, (char *)y, 2*RS_SCSZ);
 		if( rc <= 0 ){
 			lerror("Failed to recv RESPONSE from prover\n");
 			return 1;
@@ -221,14 +231,18 @@ namespace rss25519{
 
 		// yB = T + c( U' - xP1 )
 		rc = 0;
+		// y1B1 + y2B2 = LHS
+		rc += crypto_scalarmult_ristretto255( LHS, y, par->B1);
+		rc += crypto_scalarmult_ristretto255( RHS, y+RS_SCSZ, par->B2);
+		rc += crypto_core_ristretto255_add( LHS, RHS, LHS);
+
 		rc += crypto_scalarmult_ristretto255( RHS, xp, par->P1); // xP1
-		//zero and free
-		hashfree(xp);
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
 		rc += crypto_core_ristretto255_sub( RHS, buf, RHS); // U' - xP1
 		rc += crypto_scalarmult_ristretto255( RHS, c, RHS); // c( U' - xP1 )
 		// T + c(U' - xP1)
 		rc += crypto_core_ristretto255_add( RHS, RHS, buf+RS_EPSZ);
+		//zero and free
+		hashfree(xp);
 		if( rc != 0 ) return rc; //abort if fail
 
 		//check if tmp is equal to x from obuffer
@@ -259,7 +273,7 @@ namespace rss25519{
 		int rc;
 
 		//------------------------------------TODO START
-		unsigned char t[2*RS_SCSZ], c[RS_SCSZ], y[RS_SCSZ], *xp;
+		unsigned char t[2*RS_SCSZ], c[RS_SCSZ], y[2*RS_SCSZ], *xp1, *xp2;
 		unsigned char tmp[RS_EPSZ], LHS[RS_EPSZ], RHS[RS_EPSZ];
 
 		//sample the pre-nonces
@@ -268,32 +282,39 @@ namespace rss25519{
 
 		//compute challenge from pre-nonce
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, t, par->B );//mB
+		rc += crypto_scalarmult_ristretto255( LHS, t, par->B1 );//mB
 		rc += crypto_scalarmult_ristretto255( RHS, t+RS_SCSZ, par->P2 );//rH
 		rc += crypto_core_ristretto255_add( c, LHS, RHS ); //compute pre-nonce
 
 		//compute nonce from challenge
-		randombytes_buf(y, RS_EPSZ);
-		xp = hashexec( mbuffer, mlen, y, c); //xp is the nonce
-		rc += crypto_scalarmult_ristretto255( tmp, xp, usk->B); //stores Y
+		randombytes_buf(y, 2*RS_EPSZ);
+		xp1 = hashexec( mbuffer, mlen, y, c); //xp is the nonce
+		xp2 = hashexec( mbuffer, mlen, y+RS_SCSZ, c); //xp is the nonce
+		rc += crypto_scalarmult_ristretto255( LHS, xp1, usk->B1); //stores Y
+		rc += crypto_scalarmult_ristretto255( RHS, xp2, usk->B2); //stores Y
+		rc += crypto_core_ristretto255_add( tmp, LHS, RHS); //stores Y
 
 		//c == tB (t+SCSZ)P1 no need to check
 		//compute response
-		crypto_core_ristretto255_scalar_mul( y , c, usk->s ); //
-		crypto_core_ristretto255_scalar_add( y, y, xp ); // y = t + cs
-		hashfree(xp);
+		crypto_core_ristretto255_scalar_mul( y , c, usk->s1 );
+		crypto_core_ristretto255_scalar_add( y, y, xp1 );
+		crypto_core_ristretto255_scalar_mul( y+RS_SCSZ , c, usk->s2 );
+		crypto_core_ristretto255_scalar_add( y+RS_SCSZ, y+RS_SCSZ, xp2 );
+		hashfree(xp1);
+		xp1 = hashexec(mbuffer, mlen, usk->U, par->P1);
 
-		xp = hashexec(mbuffer, mlen, usk->U, par->P1);
+		//compute LHS
+		rc += crypto_scalarmult_ristretto255( LHS, y, par->B1);
+		rc += crypto_scalarmult_ristretto255( RHS, y+RS_SCSZ, par->B2);
+		rc += crypto_core_ristretto255_add( LHS, RHS, LHS);
 
-		// yB = T + c( U' - xP1 )
-		rc += crypto_scalarmult_ristretto255( RHS, xp, par->P1); // xP1
-		//zero and free
-		hashfree(xp);
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
-		rc += crypto_core_ristretto255_sub( RHS, usk->U, RHS); // U' - xP1
-		rc += crypto_scalarmult_ristretto255( RHS, c, RHS); // c( U' - xP1 )
+		rc += crypto_scalarmult_ristretto255( RHS, xp1, par->P1); // Xalpha
+		rc += crypto_core_ristretto255_sub( RHS, usk->U, RHS);
+		rc += crypto_scalarmult_ristretto255( RHS, c, RHS);
 		// T + c(U' - xP1)
 		rc += crypto_core_ristretto255_add( RHS, RHS, tmp);
+		//zero and free
+		hashfree(xp1);
 		if( rc != 0 ) return rc; //abort if fail
 
 		//check LHS == RHS

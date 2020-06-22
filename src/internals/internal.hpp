@@ -26,7 +26,7 @@
 #ifndef _INTERNAL_HPP_
 #define _INTERNAL_HPP_
 
-struct algostr{
+struct ialgostr{
 	void (*randkeygen)(void **);
 	void (*signatgen)( void *, unsigned char *, size_t, void ** );
 	int (*signatchk)(void *,void *, unsigned char *, size_t);

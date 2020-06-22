@@ -1,0 +1,5 @@
+figure a way to point to the algorithms
+
+fixup rtw25519, error in prove/verify
+fixup the sch25519, tsc25519 and twn25519 to follow template format
+CLI scheme implementation and fiore_id based AKE

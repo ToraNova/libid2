@@ -31,7 +31,7 @@
 #include "proto.hpp"
 
 namespace <TEMPLATE>{
-	const struct algostr ftable = {
+	const struct ialgostr ftable = {
 		&randomkey,
 		&signatgen,
 		&signatchk,
