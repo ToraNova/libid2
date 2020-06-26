@@ -58,9 +58,40 @@ namespace a25519 {
 			unsigned char *mbuffer, size_t mlen,
 			unsigned char *obuffer, size_t olen
 		);
+
+		//TODO: implement the following methods
+		//following 2 are for certificateless schemes
+		//compute user secret value and upk1
+		int setuserkey(
+			unsigned int algotype,
+			unsigned char **ubuffer, size_t *ulen
+		);
+
+		//ppk - obuffer, sv,upk - ubuffer
+		//fbuffer contains upk and usk
+		int setuprvkey(
+			unsigned int algotype,
+			unsigned char *pbuffer, size_t plen,
+			unsigned char *obuffer, size_t olen,
+			unsigned char *ubuffer, size_t ulen,
+			unsigned char *mbuffer, size_t mlen,
+			unsigned char **fbuffer, size_t *flen
+		);
+
+	}
+
+	namespace ake{
+
+		int execute(
+			unsigned int algotype,
+			unsigned char *pbuffer, size_t plen,
+			unsigned char *obuffer, size_t olen
+		)
+
 	}
 
 	namespace ibi{
+
 		int prove(
 			unsigned int algotype,
 			unsigned char *mbuffer, size_t mlen,

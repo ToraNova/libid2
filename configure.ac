@@ -1,5 +1,5 @@
 # main init. (PROJECT NAME), (VERSION), (DEBUG EMAIL ADDR)
-AC_INIT([id2], [1.1], [chia_jason96@live.com])
+AC_INIT([libid2], [1.1], [chia_jason96@live.com])
 
 # initialize automake, report warnings as errors
 # foreign keyword here specify that this package is a foreign package
