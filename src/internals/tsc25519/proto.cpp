@@ -58,7 +58,7 @@ namespace tsc25519{
 	int signatprv(
 		int sock,
 		void *vusk,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	){
 		//socket check and key recast
 		if(sock == -1){return 1;}
@@ -129,7 +129,7 @@ namespace tsc25519{
 	int signatvrf(
 		int sock,
 		void *vpar,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	){
 		//socket check and key recast
 		if(sock == -1){return 1;}
@@ -211,7 +211,7 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 	int prototest(
 		void *vpar,
 		void *vusk,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	){
 		//key recast
 		struct pubkey *par = (struct pubkey *)vpar;

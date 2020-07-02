@@ -90,7 +90,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = a25519$(EXEEXT)
+@COMPILETESTS_TRUE@noinst_PROGRAMS = a25519$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -154,9 +154,10 @@ am__v_lt_1 =
 libid2_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libid2_la_LDFLAGS) $(LDFLAGS) -o $@
-am_a25519_OBJECTS = tests/a25519.$(OBJEXT)
+am__a25519_SOURCES_DIST = tests/a25519.c
+@COMPILETESTS_TRUE@am_a25519_OBJECTS = tests/a25519.$(OBJEXT)
 a25519_OBJECTS = $(am_a25519_OBJECTS)
-a25519_DEPENDENCIES = libid2.la
+@COMPILETESTS_TRUE@a25519_DEPENDENCIES = libid2.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -227,7 +228,7 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libid2_la_SOURCES) $(a25519_SOURCES)
-DIST_SOURCES = $(libid2_la_SOURCES) $(a25519_SOURCES)
+DIST_SOURCES = $(libid2_la_SOURCES) $(am__a25519_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -395,8 +396,8 @@ libid2_la_LDFLAGS = -lsodium
 
 # header files to be installed; $(includedir) @default /usr/local/include
 include_HEADERS = id2.h id2.hpp
-a25519_SOURCES = tests/a25519.c
-a25519_LDADD = libid2.la
+@COMPILETESTS_TRUE@a25519_SOURCES = tests/a25519.c
+@COMPILETESTS_TRUE@a25519_LDADD = libid2.la
 all: all-am
 
 .SUFFIXES:

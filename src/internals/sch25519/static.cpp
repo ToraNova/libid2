@@ -100,7 +100,7 @@ namespace sch25519{
 
 	void signatgen(
 		void *vkey,
-		unsigned char *mbuffer, size_t mlen,
+		const unsigned char *mbuffer, size_t mlen,
 		void **out
 	){
 		//key recast
@@ -146,7 +146,7 @@ namespace sch25519{
 	int signatchk(
 		void *vpar,
 		void *vsig,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	){
 		//key recast
 		int rc; unsigned char *xp;
@@ -193,7 +193,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 	}
 
 	unsigned char *hashexec(
-		unsigned char *mbuffer, size_t mlen,
+		const unsigned char *mbuffer, size_t mlen,
 		unsigned char *ubuffer,
 		unsigned char *vbuffer
 	){
@@ -263,7 +263,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		return rs;
 	}
 
-	void secstruct(unsigned char *sbuffer, size_t slen, void **out){
+	void secstruct(const unsigned char *sbuffer, size_t slen, void **out){
 		struct seckey *tmp; size_t rs;
 		//allocate memory for seckey
 		tmp = (struct seckey *)malloc( sizeof(struct seckey));
@@ -283,7 +283,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 	}
 
 
-	void pubstruct(unsigned char *pbuffer, size_t plen, void **out){
+	void pubstruct(const unsigned char *pbuffer, size_t plen, void **out){
 		struct pubkey *tmp; size_t rs;
 		//allocate memory for pubkey
 		tmp = (struct pubkey *)malloc( sizeof(struct pubkey) );
@@ -298,7 +298,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		*out = (void *) tmp; return;
 	}
 
-	void sigstruct(unsigned char *obuffer, size_t olen, void **out){
+	void sigstruct(const unsigned char *obuffer, size_t olen, void **out){
 		struct signat *tmp; size_t rs;
 		//allocate memory for pubkey
 		tmp = (struct signat *)malloc( sizeof(struct signat) );

@@ -86,7 +86,7 @@ namespace twn25519 {
 	//generate a signature based on a seckey and message
 	void signatgen(
 		void *vkey,
-		unsigned char *mbuffer, size_t mlen,
+		const unsigned char *mbuffer, size_t mlen,
 		void **out
 	);
 
@@ -94,12 +94,12 @@ namespace twn25519 {
 	int signatchk(
 		void *vpar,
 		void *vsig,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	);
 
 	//hashexec (internal)
 	unsigned char *hashexec(
-		unsigned char *mbuffer, size_t mlen,
+		const unsigned char *mbuffer, size_t mlen,
 		unsigned char *ubuffer,
 		unsigned char *vbuffer
 	);
@@ -113,9 +113,9 @@ namespace twn25519 {
 
 	//creates a public key struct from the serialize string
 	//inverse of secserial, pubserial and sigserial
-	void secstruct(unsigned char *sbuffer, size_t slen, void **out);
-	void pubstruct(unsigned char *pbuffer, size_t plen, void **out);
-	void sigstruct(unsigned char *obuffer, size_t olen, void **out);
+	void secstruct(const unsigned char *sbuffer, size_t slen, void **out);
+	void pubstruct(const unsigned char *pbuffer, size_t plen, void **out);
+	void sigstruct(const unsigned char *obuffer, size_t olen, void **out);
 
 	//destroy secret,public and signature struct
 	void secdestroy(void *in);

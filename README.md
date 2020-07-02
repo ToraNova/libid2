@@ -3,7 +3,7 @@ id2 is a library for identity-based identification (ibi) for systems requiring a
 
 # Dependencies
 id2 uses the following external libraries:
-1. [NaCL](https://nacl.cr.yp.to/)
+1. [libsodium](https://github.com/jedisct1/libsodium)
 
 ## Compile
 To compile, ensure autotools such as `automake`, `autoconf` and `libtool` are installed.
@@ -19,11 +19,7 @@ make install
 ```
 To compile and test with debugging
 ```
-cd debug && ../configure --prefix=/debug
-```
-OR
-```
-../configure CPPFLAGS="-DDEBUG" CFLAGS="-DDEBUG -g -O0"
+../configure --enable-debug --enable-tests
 ```
 
 ### Supported IBI Schemes

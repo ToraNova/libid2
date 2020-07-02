@@ -111,7 +111,7 @@ namespace tsc25519{
 
 	void signatgen(
 		void *vkey,
-		unsigned char *mbuffer, size_t mlen,
+		const unsigned char *mbuffer, size_t mlen,
 		void **out
 	){
 		//declare and allocate for signature struct, nonce
@@ -165,7 +165,7 @@ namespace tsc25519{
 	int signatchk(
 		void *vpar,
 		void *vsig,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	){
 		//key recast and declaration
 		int rc; unsigned char *xp;
@@ -232,7 +232,7 @@ namespace tsc25519{
 	}
 
 	unsigned char *hashexec(
-		unsigned char *mbuffer, size_t mlen,
+		const unsigned char *mbuffer, size_t mlen,
 		unsigned char *ubuffer,
 		unsigned char *vbuffer,
 		unsigned char *pbuffer,
@@ -311,7 +311,7 @@ namespace tsc25519{
 		return rs;
 	}
 
-	void secstruct(unsigned char *sbuffer, size_t slen, void **out){
+	void secstruct(const unsigned char *sbuffer, size_t slen, void **out){
 		struct seckey *tmp; size_t rs;
 		//allocate memory for seckey
 		tmp = (struct seckey *)malloc( sizeof(struct seckey));
@@ -335,7 +335,7 @@ namespace tsc25519{
 	}
 
 
-	void pubstruct(unsigned char *pbuffer, size_t plen, void **out){
+	void pubstruct(const unsigned char *pbuffer, size_t plen, void **out){
 		struct pubkey *tmp; size_t rs;
 		//allocate memory for pubkey
 		tmp = (struct pubkey *)malloc( sizeof(struct pubkey) );
@@ -354,7 +354,7 @@ namespace tsc25519{
 		*out = (void *) tmp; return;
 	}
 
-	void sigstruct(unsigned char *obuffer, size_t olen, void **out){
+	void sigstruct(const unsigned char *obuffer, size_t olen, void **out){
 		struct signat *tmp; size_t rs;
 		//allocate memory for pubkey
 		tmp = (struct signat *)malloc( sizeof(struct signat) );

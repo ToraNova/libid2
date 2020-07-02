@@ -44,21 +44,21 @@ namespace <TEMPLATE> {
 	int signatprv(
 		int sock,
 		void *vusk,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	);
 
 	//verify existence of usk of particular mbuffer(ID)
 	int signatvrf(
 		int sock,
 		void *vpar,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	);
 
 	// an auxiliary function to test param and usk
 	int prototest(
 		void *vpar,
 		void *vusk,
-		unsigned char *mbuffer, size_t mlen
+		const unsigned char *mbuffer, size_t mlen
 	);
 }
 

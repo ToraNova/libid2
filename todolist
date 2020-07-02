@@ -1,5 +1,5 @@
-figure a way to point to the algorithms
+IMPORTANT:UPDATE ristretto25519 to use scalarmult_base instead
+use constant unsigned char on input that does not change
 
-fixup rtw25519, error in prove/verify
-fixup the sch25519, tsc25519 and twn25519 to follow template format
-CLI scheme implementation and fiore_id based AKE
+decouple the socket library
+

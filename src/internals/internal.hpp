@@ -28,22 +28,22 @@
 
 struct ialgostr{
 	void (*randkeygen)(void **);
-	void (*signatgen)( void *, unsigned char *, size_t, void ** );
-	int (*signatchk)(void *,void *, unsigned char *, size_t);
+	void (*signatgen)( void *, const unsigned char *, size_t, void ** );
+	int (*signatchk)(void *,void *, const unsigned char *, size_t);
 	size_t (*secserial)(void *, unsigned char **, size_t *);
 	size_t (*pubserial)(void *, unsigned char **, size_t *);
 	size_t (*sigserial)(void *, unsigned char **, size_t *);
-	void (*secstruct)(unsigned char *, size_t, void **);
-	void (*pubstruct)(unsigned char *, size_t, void **);
-	void (*sigstruct)(unsigned char *, size_t, void **);
+	void (*secstruct)(const unsigned char *, size_t, void **);
+	void (*pubstruct)(const unsigned char *, size_t, void **);
+	void (*sigstruct)(const unsigned char *, size_t, void **);
 	void (*secdestroy)(void *);
 	void (*pubdestroy)(void *);
 	void (*sigdestroy)(void *);
 	void (*secprint)(void *);
 	void (*pubprint)(void *);
 	void (*sigprint)(void *);
-	int (*signatprv)(int, void *, unsigned char *, size_t);
-	int (*signatvrf)(int, void *, unsigned char *, size_t);
-	int (*prototest)(void *, void *, unsigned char *, size_t);
+	int (*signatprv)(int, void *, const unsigned char *, size_t);
+	int (*signatvrf)(int, void *, const unsigned char *, size_t);
+	int (*prototest)(void *, void *, const unsigned char *, size_t);
 };
 #endif

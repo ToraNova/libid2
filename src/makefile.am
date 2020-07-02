@@ -17,7 +17,9 @@ libid2_la_LDFLAGS = -lsodium
 # header files to be installed; $(includedir) @default /usr/local/include
 include_HEADERS = id2.h id2.hpp
 
+if COMPILETESTS
 # define programs to be compiled and installed; $(bindir) @default /usr/local/bin
 noinst_PROGRAMS = a25519
 a25519_SOURCES = tests/a25519.c
 a25519_LDADD = libid2.la
+endif

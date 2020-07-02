@@ -86,7 +86,7 @@ namespace a25519 {
 			unsigned int algotype,
 			unsigned char *pbuffer, size_t plen,
 			unsigned char *obuffer, size_t olen
-		)
+		);
 
 	}
 
