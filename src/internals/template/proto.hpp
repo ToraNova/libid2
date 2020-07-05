@@ -24,7 +24,7 @@
  */
 
 /*
- * TODO: please edit description
+ * TODO: please edit
  *
  * ToraNova 2020
  * chia_jason96@live.com

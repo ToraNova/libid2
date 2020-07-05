@@ -24,7 +24,7 @@
  */
 
 /*
- * TODO: please edit description
+ * TODO: please edit
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -44,7 +44,7 @@ namespace <TEMPLATE> {
 	// for Curve25519 keys
 	// -- NEPC - base/point components
 	// -- NSSC - scalar components
-	const size_t PKEY_NEPC = 3;
+	const size_t PKEY_NEPC = 2;
 	const size_t PKEY_NSCC = 0;
 	const size_t PKEY_SZ = PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ;
 	// only define secrets here, ignore the pubkey element in skey
@@ -53,12 +53,11 @@ namespace <TEMPLATE> {
 	const size_t SKEY_SZ =  PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ+
 				SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ;
 	// signature
-	const size_t SGNT_NEPC = 3;
+	const size_t SGNT_NEPC = 2;
 	const size_t SGNT_NSCC = 2;
 	const size_t SGNT_SZ = SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ;
 
 	struct pubkey{
-		unsigned char *B;
 		unsigned char *P1;
 		unsigned char *P2;
 	};
@@ -75,7 +74,6 @@ namespace <TEMPLATE> {
 		//points
 		unsigned char *U;
 		unsigned char *V;
-		unsigned char *B;
 	};
 
 	//randomly generate a key
@@ -95,7 +93,7 @@ namespace <TEMPLATE> {
 		const unsigned char *mbuffer, size_t mlen
 	);
 
-	//hashexec (internal)
+	// hash( m, u, v) to a scalar in ristretto255
 	// output is always size RS_SCSZ
 	unsigned char *hashexec(
 		const unsigned char *mbuffer, size_t mlen,

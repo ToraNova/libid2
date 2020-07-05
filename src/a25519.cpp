@@ -99,11 +99,13 @@ namespace sig{
 		//signature generation
 		iftable[a]->signatgen(key, mbuffer, mlen, &sig);
 
+		debug("test\n");
 		//clear the secret key
 		iftable[a]->secdestroy(key);
 
 		//serialize the signature to string
 		iftable[a]->sigserial(sig, obuffer, olen);
+
 
 #ifdef DEBUG
 iftable[a]->sigprint(sig);

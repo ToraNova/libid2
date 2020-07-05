@@ -24,7 +24,7 @@
  */
 
 /*
- * TODO: please edit the description here
+ * TODO: please write details
  *
  * ToraNova 2020
  * chia_jason96@live.com
@@ -76,7 +76,7 @@ namespace <TEMPLATE>{
 		// T = tB
 		memcpy( buf, usk->U, RS_EPSZ);
 		memcpy( buf+RS_EPSZ, usk->V, RS_EPSZ);
-		rc = crypto_scalarmult_ristretto255( buf+2*RS_EPSZ, t, usk->B);
+		rc = crypto_scalarmult_ristretto255_base( buf+2*RS_EPSZ, t);
 		if( rc != 0 ){
 			//abort if fail
 			lerror("Failed to compute COMMIT\n");
@@ -176,7 +176,7 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 
 		// yB = T + c( U' - xP1 )
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
+		rc += crypto_scalarmult_ristretto255_base( LHS, y ); // yB
 		rc += crypto_scalarmult_ristretto255( RHS, xp, par->P1); // xP1
 		rc += crypto_core_ristretto255_add( RHS, buf, RHS); // U' - xP1
 		rc += crypto_scalarmult_ristretto255( RHS, c, RHS); // c( U' - xP1 )
@@ -228,14 +228,14 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 
 		// yB = T + c( U' - xP1 )
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
+		rc += crypto_scalarmult_ristretto255_base( LHS, y); // yB
 		rc += crypto_scalarmult_ristretto255( RHS, xp, par->P1); // xP1
 		hashfree(xp);
 		rc += crypto_core_ristretto255_add( RHS, usk->U, RHS); // U' - xP1
 		rc += crypto_scalarmult_ristretto255( RHS, c, RHS); // c( U' - xP1 )
 
 		//T = tB
-		rc += crypto_scalarmult_ristretto255( tmp, t, usk->B);
+		rc += crypto_scalarmult_ristretto255_base( tmp, t);
 
 		// T + c(U' - xP1)
 		rc += crypto_core_ristretto255_add( RHS, tmp, RHS);
