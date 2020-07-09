@@ -303,22 +303,30 @@ int main(int argc, char *argv[]){
 					unsigned char mbuf[1024];
 					int fd = open("/dev/urandom", O_RDONLY);
 
+					cpu_time_use0 = 0;
 					for( i=0; i< int_testcnt; i++){
 						read(fd, mbuf, 1024);
 						a25519_keygen(algo, &pbuf, &plen, &sbuf, &slen);
 						a25519_sig_sign(algo, sbuf, slen, mbuf, 1024, &obuf, &olen);
-						rc = a25519_sig_verify(algo, pbuf, plen, mbuf, 1024, obuf, olen);
-						if(rc != 0){
-							printf("Invalid signature on iter. %u\n",i);
-							break;
-						}
+
+						// signature test
+						//rc = a25519_sig_verify(algo, pbuf, plen, mbuf, 1024, obuf, olen);
+						//if(rc != 0){
+						//	printf("Invalid signature on iter. %u\n",i);
+						//	break;
+						//}
+
+						start = clock();
 						rc = a25519_test_offline(algo, pbuf, plen, mbuf, 1024, obuf, olen);
+						end = clock();
+						cpu_time_use0 += ((((double) (end - start)) / CLOCKS_PER_SEC) * 1000);
 						if(rc != 0){
 							printf("Invalid offline proto on iter. %u\n",i);
 							break;
 						}
 					}
-					printf("offline full test done iter. %u\n",i);
+					cpu_time_use2 = cpu_time_use0 / int_testcnt;
+					printf("offline full test done iter. %u @ %f \n",i,cpu_time_use2);
 				}
 			}else{
 				lerror("Please specify either <prove|verify|signat|of> for runtest !\n");

@@ -44,7 +44,7 @@ namespace twn25519 {
 	// for Curve25519 keys
 	// -- NEPC - base/point components
 	// -- NSSC - scalar components
-	const size_t PKEY_NEPC = 3;
+	const size_t PKEY_NEPC = 2;
 	const size_t PKEY_NSCC = 0;
 	const size_t PKEY_SZ = PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ;
 	// only define secrets here, ignore the pubkey element in skey
@@ -53,12 +53,11 @@ namespace twn25519 {
 	const size_t SKEY_SZ =  PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ+
 				SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ;
 	// signature
-	const size_t SGNT_NEPC = 3;
+	const size_t SGNT_NEPC = 2;
 	const size_t SGNT_NSCC = 3;
 	const size_t SGNT_SZ = SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ;
 
 	struct pubkey{
-		unsigned char *B1;
 		unsigned char *B2;
 		unsigned char *P;
 	};
@@ -76,7 +75,6 @@ namespace twn25519 {
 		unsigned char *x;
 		//points
 		unsigned char *U;
-		unsigned char *B1;
 		unsigned char *B2;
 	};
 

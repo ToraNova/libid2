@@ -41,7 +41,7 @@
 namespace rss25519 {
 
 	// Size definitions TODO: please edit NEPC and NSCC accordingly
-	const size_t PKEY_NEPC = 3;
+	const size_t PKEY_NEPC = 2;
 	const size_t PKEY_NSCC = 0;
 	const size_t PKEY_SZ = PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ;
 	const size_t SKEY_NEPC = 0;
@@ -53,7 +53,6 @@ namespace rss25519 {
 	const size_t SGNT_SZ = SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ;
 
 	struct pubkey{
-		unsigned char *B;
 		unsigned char *P1;
 		unsigned char *P2;
 	};

@@ -1,8 +1,4 @@
-IMPORTANT:UPDATE ristretto25519 to use scalarmult_base instead
-Done:
-	tnc25519
-	sch25519
+update malloc to sodium_malloc (IMPORTANT)
 use constant unsigned char on input that does not change
-
 decouple the socket library
 

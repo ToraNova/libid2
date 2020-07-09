@@ -79,7 +79,7 @@ namespace twn25519{
 		//CMT <- U',V' T
 		// T = tB
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( tb1, t1, usk->B1);
+		rc += crypto_scalarmult_ristretto255_base( tb1, t1);
 		rc += crypto_scalarmult_ristretto255( tb2, t2, usk->B2);
 		rc += crypto_core_ristretto255_add( buf, tb1, tb2);
 		if( rc != 0 ){
@@ -194,7 +194,7 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 		//zero and free
 		hashfree(xp);
 
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B1);
+		rc += crypto_scalarmult_ristretto255_base( LHS, y);
 		rc += crypto_scalarmult_ristretto255( tmp2, y+RS_SCSZ, par->B2);
 		rc += crypto_core_ristretto255_add( LHS, LHS, tmp2); //z1G1, z2G2 LHS
 
@@ -250,11 +250,11 @@ printf("x':"); ucbprint( xp, RS_SCSZ ); printf("\n");
 
 		//T = tB
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( tmp1, t1, usk->B1);
+		rc += crypto_scalarmult_ristretto255_base( tmp1, t1);
 		rc += crypto_scalarmult_ristretto255( tmp2, t2, usk->B2);
 		rc += crypto_core_ristretto255_add( tmp, tmp1, tmp2);
 
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B1);
+		rc += crypto_scalarmult_ristretto255_base( LHS, y);
 		rc += crypto_scalarmult_ristretto255( tmp1, y+RS_SCSZ, par->B2);
 		rc += crypto_core_ristretto255_add( LHS, LHS, tmp1); // z1g1 z2g2
 

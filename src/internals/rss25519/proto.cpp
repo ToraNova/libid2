@@ -88,7 +88,7 @@ namespace rss25519{
 		//CMT <- U', T
 		// T = tB
 		memcpy( buf, usk->U, RS_EPSZ);
-		rc = crypto_scalarmult_ristretto255( buf+RS_EPSZ, xp, usk->B);
+		rc = crypto_scalarmult_ristretto255_base( buf+RS_EPSZ, xp);
 		if( rc != 0 ){
 			//abort if fail
 			lerror("Failed to compute COMMIT\n");
@@ -107,7 +107,7 @@ namespace rss25519{
 		//--------------------------------------------------------
 		//--------------VERIFY REVEAL
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( tmp1, t, usk->B); //fixed
+		rc += crypto_scalarmult_ristretto255_base( tmp1, t); //fixed
 		rc += crypto_scalarmult_ristretto255( tmp2, t+RS_SCSZ, usk->P2);//rH
 		rc += crypto_core_ristretto255_add( tmp, tmp1, tmp2);
 		rc += crypto_verify_32(tmp, c);
@@ -177,7 +177,7 @@ namespace rss25519{
 		crypto_core_ristretto255_scalar_random(pc); //m
 		crypto_core_ristretto255_scalar_random(pc+RS_SCSZ); //r
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, pc, par->B );//mB
+		rc += crypto_scalarmult_ristretto255_base( LHS, pc);//mB
 		rc += crypto_scalarmult_ristretto255( RHS, pc+RS_SCSZ, par->P2 );//rH
 		rc += crypto_core_ristretto255_add( c, LHS, RHS ); //compute pre-nonce
 		if( rc != 0 ) return rc; //abort if fail
@@ -224,7 +224,7 @@ namespace rss25519{
 		rc += crypto_scalarmult_ristretto255( RHS, xp, par->P1); // xP1
 		//zero and free
 		hashfree(xp);
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
+		rc += crypto_scalarmult_ristretto255_base( LHS, y); // yB
 		rc += crypto_core_ristretto255_sub( RHS, buf, RHS); // U' - xP1
 		rc += crypto_scalarmult_ristretto255( RHS, c, RHS); // c( U' - xP1 )
 		// T + c(U' - xP1)
@@ -268,14 +268,14 @@ namespace rss25519{
 
 		//compute challenge from pre-nonce
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, t, par->B );//mB
+		rc += crypto_scalarmult_ristretto255_base( LHS, t);//mB
 		rc += crypto_scalarmult_ristretto255( RHS, t+RS_SCSZ, par->P2 );//rH
 		rc += crypto_core_ristretto255_add( c, LHS, RHS ); //compute pre-nonce
 
 		//compute nonce from challenge
 		randombytes_buf(y, RS_EPSZ);
 		xp = hashexec( mbuffer, mlen, y, c); //xp is the nonce
-		rc += crypto_scalarmult_ristretto255( tmp, xp, usk->B); //stores Y
+		rc += crypto_scalarmult_ristretto255_base( tmp, xp); //stores Y
 
 		//c == tB (t+SCSZ)P1 no need to check
 		//compute response
@@ -289,7 +289,7 @@ namespace rss25519{
 		rc += crypto_scalarmult_ristretto255( RHS, xp, par->P1); // xP1
 		//zero and free
 		hashfree(xp);
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
+		rc += crypto_scalarmult_ristretto255_base( LHS, y); // yB
 		rc += crypto_core_ristretto255_sub( RHS, usk->U, RHS); // U' - xP1
 		rc += crypto_scalarmult_ristretto255( RHS, c, RHS); // c( U' - xP1 )
 		// T + c(U' - xP1)

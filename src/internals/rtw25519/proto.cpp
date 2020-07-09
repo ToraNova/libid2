@@ -90,7 +90,7 @@ namespace rtw25519{
 		randombytes_buf(y, 2*RS_EPSZ);
 		xp1 = hashexec( mbuffer, mlen, y, c);
 		xp2 = hashexec( mbuffer, mlen, y+RS_SCSZ, c);
-		rc += crypto_scalarmult_ristretto255( tmp1, xp1, usk->B1);
+		rc += crypto_scalarmult_ristretto255_base( tmp1, xp1);
 		rc += crypto_scalarmult_ristretto255( tmp2, xp2, usk->B2);
 		rc += crypto_core_ristretto255_add( buf+RS_EPSZ, tmp1, tmp2);
 
@@ -112,7 +112,7 @@ namespace rtw25519{
 		//--------------------------------------------------------
 		//--------------VERIFY REVEAL
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( tmp1, t, usk->B1); //fixed
+		rc += crypto_scalarmult_ristretto255_base( tmp1, t); //fixed
 		rc += crypto_scalarmult_ristretto255( tmp2, t+RS_SCSZ, usk->P2);//rH
 		rc += crypto_core_ristretto255_add( tmp, tmp1, tmp2);
 		rc += crypto_verify_32(tmp, c);
@@ -187,7 +187,7 @@ namespace rtw25519{
 		crypto_core_ristretto255_scalar_random(pc); //m
 		crypto_core_ristretto255_scalar_random(pc+RS_SCSZ); //r
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, pc, par->B1 );//mB
+		rc += crypto_scalarmult_ristretto255_base( LHS, pc);//mB
 		rc += crypto_scalarmult_ristretto255( RHS, pc+RS_SCSZ, par->P2 );//rH
 		rc += crypto_core_ristretto255_add( c, LHS, RHS ); //compute pre-nonce
 		if( rc != 0 ) return rc; //abort if fail
@@ -232,7 +232,7 @@ namespace rtw25519{
 		// yB = T + c( U' - xP1 )
 		rc = 0;
 		// y1B1 + y2B2 = LHS
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B1);
+		rc += crypto_scalarmult_ristretto255_base( LHS, y);
 		rc += crypto_scalarmult_ristretto255( RHS, y+RS_SCSZ, par->B2);
 		rc += crypto_core_ristretto255_add( LHS, RHS, LHS);
 
@@ -282,7 +282,7 @@ namespace rtw25519{
 
 		//compute challenge from pre-nonce
 		rc = 0;
-		rc += crypto_scalarmult_ristretto255( LHS, t, par->B1 );//mB
+		rc += crypto_scalarmult_ristretto255_base( LHS, t);//mB
 		rc += crypto_scalarmult_ristretto255( RHS, t+RS_SCSZ, par->P2 );//rH
 		rc += crypto_core_ristretto255_add( c, LHS, RHS ); //compute pre-nonce
 
@@ -290,7 +290,7 @@ namespace rtw25519{
 		randombytes_buf(y, 2*RS_EPSZ);
 		xp1 = hashexec( mbuffer, mlen, y, c); //xp is the nonce
 		xp2 = hashexec( mbuffer, mlen, y+RS_SCSZ, c); //xp is the nonce
-		rc += crypto_scalarmult_ristretto255( LHS, xp1, usk->B1); //stores Y
+		rc += crypto_scalarmult_ristretto255_base( LHS, xp1); //stores Y
 		rc += crypto_scalarmult_ristretto255( RHS, xp2, usk->B2); //stores Y
 		rc += crypto_core_ristretto255_add( tmp, LHS, RHS); //stores Y
 
@@ -304,7 +304,7 @@ namespace rtw25519{
 		xp1 = hashexec(mbuffer, mlen, usk->U, par->P1);
 
 		//compute LHS
-		rc += crypto_scalarmult_ristretto255( LHS, y, par->B1);
+		rc += crypto_scalarmult_ristretto255_base( LHS, y);
 		rc += crypto_scalarmult_ristretto255( RHS, y+RS_SCSZ, par->B2);
 		rc += crypto_core_ristretto255_add( LHS, RHS, LHS);
 
