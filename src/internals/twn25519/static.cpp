@@ -76,8 +76,8 @@ namespace twn25519{
 		unsigned char neg[RS_SCSZ];
 		unsigned char tbs[RS_EPSZ];
 
-		tmp->a1 = (unsigned char *)malloc( RS_SCSZ );
-		tmp->a2 = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a1 = (unsigned char *)sodium_malloc( RS_SCSZ );
+		tmp->a2 = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P  = (unsigned char *)malloc( RS_EPSZ );
 
@@ -112,8 +112,8 @@ namespace twn25519{
 		unsigned char n1[RS_SCSZ], n2[RS_SCSZ];
 
 		//allocate for components
-		tmp->s1 = (unsigned char *)malloc( RS_SCSZ );
-		tmp->s2 = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s1 = (unsigned char *)sodium_malloc( RS_SCSZ );
+		tmp->s2 = (unsigned char *)sodium_malloc( RS_SCSZ );
 		//tmp->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->B2 = (unsigned char *)malloc( RS_EPSZ );
@@ -245,8 +245,8 @@ namespace twn25519{
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements and scalars
-		tmp->a1 = (unsigned char *)malloc( RS_SCSZ );
-		tmp->a2 = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a1 = (unsigned char *)sodium_malloc( RS_SCSZ );
+		tmp->a2 = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P = (unsigned char *)malloc( RS_EPSZ );
 
@@ -280,8 +280,8 @@ namespace twn25519{
 		tmp = (struct signat *)malloc( sizeof(struct signat) );
 
 		//allocate for components on signature struct
-		tmp->s1 = (unsigned char *)malloc( RS_SCSZ );
-		tmp->s2 = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s1 = (unsigned char *)sodium_malloc( RS_SCSZ );
+		tmp->s2 = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->B2 = (unsigned char *)malloc( RS_EPSZ );
@@ -304,8 +304,8 @@ namespace twn25519{
 		sodium_memzero(ri->a2, RS_SCSZ);
 
 		//free memory
-		free(ri->a1);
-		free(ri->a2);
+		sodium_free(ri->a1);
+		sodium_free(ri->a2);
 		pubdestroy(ri->pub);
 		free(ri); return;
 	}
@@ -328,8 +328,8 @@ namespace twn25519{
 		sodium_memzero(ri->x, RS_SCSZ);
 		sodium_memzero(ri->U, RS_EPSZ);
 		//free memory
-		free(ri->s1);
-		free(ri->s2);
+		sodium_free(ri->s1);
+		sodium_free(ri->s2);
 		free(ri->x);
 		free(ri->U);
 		free(ri->B2);

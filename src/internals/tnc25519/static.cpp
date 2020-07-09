@@ -76,7 +76,7 @@ namespace tnc25519{
 
 		//-------------------------------------TODO START EDIT
 		//allocate memory for the elements and scalars
-		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
@@ -113,7 +113,7 @@ namespace tnc25519{
 
 		//-------------------------------------TODO START EDIT
 		//allocate for components
-		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s = (unsigned char *)sodium_malloc( RS_SCSZ );
 		//tmp->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->V = (unsigned char *)malloc( RS_EPSZ );
@@ -262,7 +262,7 @@ namespace tnc25519{
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements and scalars
-		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
@@ -293,7 +293,7 @@ namespace tnc25519{
 		tmp = (struct signat *)malloc( sizeof(struct signat) );
 
 		//allocate for components on signature struct
-		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->V = (unsigned char *)malloc( RS_EPSZ );
@@ -313,7 +313,7 @@ namespace tnc25519{
 		sodium_memzero(ri->a, RS_SCSZ);
 
 		//free memory
-		free(ri->a);
+		sodium_free(ri->a);
 		pubdestroy(ri->pub);
 		free(ri); return;
 	}
@@ -336,7 +336,7 @@ namespace tnc25519{
 		sodium_memzero(ri->U, RS_EPSZ);
 		sodium_memzero(ri->V, RS_EPSZ);
 		//free memory
-		free(ri->s);
+		sodium_free(ri->s);
 		free(ri->x);
 		free(ri->U);
 		free(ri->V);

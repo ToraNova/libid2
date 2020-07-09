@@ -76,7 +76,7 @@ namespace sch25519{
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 		unsigned char neg[RS_SCSZ];
 
-		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 
 		//sample secret a
@@ -111,7 +111,7 @@ namespace sch25519{
 		unsigned char nonce[RS_SCSZ];
 
 		//allocate for components
-		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 
 		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
@@ -259,7 +259,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements and scalars
-		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->a,		sbuffer, 0, 	RS_SCSZ);
@@ -288,7 +288,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		tmp = (struct signat *)malloc( sizeof(struct signat) );
 
 		//allocate for components on signature struct
-		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 
@@ -307,7 +307,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		sodium_memzero(ri->a, RS_SCSZ);
 
 		//free memory
-		free(ri->a);
+		sodium_free(ri->a);
 		pubdestroy(ri->pub);
 		free(ri); return;
 	}
@@ -328,7 +328,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		sodium_memzero(ri->x, RS_SCSZ);
 		sodium_memzero(ri->U, RS_EPSZ);
 		//free memory
-		free(ri->s);
+		sodium_free(ri->s);
 		free(ri->x);
 		free(ri->U);
 		free(ri); return;

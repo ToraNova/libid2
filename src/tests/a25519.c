@@ -43,6 +43,11 @@ int main(int argc, char *argv[]){
 	unsigned int i;
 	double cpu_time_use0, cpu_time_use1, cpu_time_use2;
 
+	if(id2_initialize()){
+		lerror("Unable to initialize libsodium\n");
+		return 1;
+	}
+
 	if(argc > 2){
 		algo = strtol(argv[1],NULL,10);
 		if( (strcmp(argv[2], "setup")==0) || (strcmp(argv[2], "keygen")==0) ){

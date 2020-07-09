@@ -46,5 +46,16 @@
 #include "utils/futil.h"
 #include "utils/asn1util.h"
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+//initialize the library
+//basically just calls sodium_init()
+int id2_initialize();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

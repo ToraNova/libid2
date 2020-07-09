@@ -27,17 +27,17 @@
 #define _ID2_HPP_
 #include "a25519.hpp"
 
-//internals
-#include "internals/proto.hpp"
-#include "internals/tnc/static.hpp"
-#include "internals/tnc/proto.hpp"
-
 //auxiliary helpers
 #include "utils/debug.h"
 #include "utils/jbase64.h"
 #include "utils/futil.h"
 #include "utils/asn1util.h"
 
-#include "internals/internals.h"
+namespace id2{
+
+	//initialize libsodium secure memory
+	//return 0 on success, 1 on fail
+	int initialize();
+}
 
 #endif

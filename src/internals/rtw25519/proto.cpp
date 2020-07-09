@@ -301,6 +301,7 @@ namespace rtw25519{
 		crypto_core_ristretto255_scalar_mul( y+RS_SCSZ , c, usk->s2 );
 		crypto_core_ristretto255_scalar_add( y+RS_SCSZ, y+RS_SCSZ, xp2 );
 		hashfree(xp1);
+		hashfree(xp2);
 		xp1 = hashexec(mbuffer, mlen, usk->U, par->P1);
 
 		//compute LHS

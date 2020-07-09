@@ -75,7 +75,7 @@ namespace rss25519{
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 		unsigned char neg[RS_SCSZ], epv[RS_SCSZ];
 
-		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
@@ -112,7 +112,7 @@ namespace rss25519{
 		unsigned char nonce[RS_SCSZ];
 
 		//allocate for components
-		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P2 = (unsigned char *)malloc( RS_EPSZ );
 
@@ -228,7 +228,7 @@ namespace rss25519{
 		tmp->pub = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements and scalars
-		tmp->a = (unsigned char *)malloc( RS_SCSZ );
+		tmp->a = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
@@ -260,7 +260,7 @@ namespace rss25519{
 		tmp = (struct signat *)malloc( sizeof(struct signat) );
 
 		//allocate for components on signature struct
-		tmp->s = (unsigned char *)malloc( RS_SCSZ );
+		tmp->s = (unsigned char *)sodium_malloc( RS_SCSZ );
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P2 = (unsigned char *)malloc( RS_EPSZ );
@@ -281,7 +281,7 @@ namespace rss25519{
 		sodium_memzero(ri->a, RS_SCSZ);
 
 		//free memory
-		free(ri->a);
+		sodium_free(ri->a);
 		pubdestroy(ri->pub);
 		free(ri); return;
 	}
@@ -303,7 +303,7 @@ namespace rss25519{
 		sodium_memzero(ri->x, RS_SCSZ);
 		sodium_memzero(ri->U, RS_EPSZ);
 		//free memory
-		free(ri->s);
+		sodium_free(ri->s);
 		free(ri->x);
 		free(ri->U);
 		free(ri->P2);

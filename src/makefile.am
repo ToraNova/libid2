@@ -2,7 +2,8 @@
 # using libtool (different library name to avoid confusion)
 # if this is used, the SHARED library file is also compiled
 lib_LTLIBRARIES = libid2.la
-libid2_la_SOURCES = internals/proto.cpp \
+libid2_la_SOURCES =  id2.cpp id2.c.cpp \
+		internals/proto.cpp \
 		internals/tnc25519/static.cpp internals/tnc25519/proto.cpp \
 		internals/sch25519/static.cpp internals/sch25519/proto.cpp \
 		internals/tsc25519/static.cpp internals/tsc25519/proto.cpp \

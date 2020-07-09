@@ -137,15 +137,15 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libid2_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libid2_la_OBJECTS = internals/proto.lo internals/tnc25519/static.lo \
-	internals/tnc25519/proto.lo internals/sch25519/static.lo \
-	internals/sch25519/proto.lo internals/tsc25519/static.lo \
-	internals/tsc25519/proto.lo internals/twn25519/static.lo \
-	internals/twn25519/proto.lo internals/rss25519/static.lo \
-	internals/rss25519/proto.lo internals/rtw25519/static.lo \
-	internals/rtw25519/proto.lo a25519.lo a25519.c.lo \
-	utils/simplesock.lo utils/jbase64.lo utils/asn1util.lo \
-	utils/futil.lo utils/bufhelp.lo
+am_libid2_la_OBJECTS = id2.lo id2.c.lo internals/proto.lo \
+	internals/tnc25519/static.lo internals/tnc25519/proto.lo \
+	internals/sch25519/static.lo internals/sch25519/proto.lo \
+	internals/tsc25519/static.lo internals/tsc25519/proto.lo \
+	internals/twn25519/static.lo internals/twn25519/proto.lo \
+	internals/rss25519/static.lo internals/rss25519/proto.lo \
+	internals/rtw25519/static.lo internals/rtw25519/proto.lo \
+	a25519.lo a25519.c.lo utils/simplesock.lo utils/jbase64.lo \
+	utils/asn1util.lo utils/futil.lo utils/bufhelp.lo
 libid2_la_OBJECTS = $(am_libid2_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -174,6 +174,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/a25519.Plo ./$(DEPDIR)/a25519.c.Plo \
+	./$(DEPDIR)/id2.Plo ./$(DEPDIR)/id2.c.Plo \
 	internals/$(DEPDIR)/proto.Plo \
 	internals/rss25519/$(DEPDIR)/proto.Plo \
 	internals/rss25519/$(DEPDIR)/static.Plo \
@@ -381,7 +382,8 @@ top_srcdir = @top_srcdir@
 # using libtool (different library name to avoid confusion)
 # if this is used, the SHARED library file is also compiled
 lib_LTLIBRARIES = libid2.la
-libid2_la_SOURCES = internals/proto.cpp \
+libid2_la_SOURCES = id2.cpp id2.c.cpp \
+		internals/proto.cpp \
 		internals/tnc25519/static.cpp internals/tnc25519/proto.cpp \
 		internals/sch25519/static.cpp internals/sch25519/proto.cpp \
 		internals/tsc25519/static.cpp internals/tsc25519/proto.cpp \
@@ -599,6 +601,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a25519.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a25519.c.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id2.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id2.c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@internals/$(DEPDIR)/proto.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@internals/rss25519/$(DEPDIR)/proto.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@internals/rss25519/$(DEPDIR)/static.Plo@am__quote@ # am--include-marker
@@ -856,6 +860,8 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/a25519.Plo
 	-rm -f ./$(DEPDIR)/a25519.c.Plo
+	-rm -f ./$(DEPDIR)/id2.Plo
+	-rm -f ./$(DEPDIR)/id2.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
 	-rm -f internals/rss25519/$(DEPDIR)/proto.Plo
 	-rm -f internals/rss25519/$(DEPDIR)/static.Plo
@@ -922,6 +928,8 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/a25519.Plo
 	-rm -f ./$(DEPDIR)/a25519.c.Plo
+	-rm -f ./$(DEPDIR)/id2.Plo
+	-rm -f ./$(DEPDIR)/id2.c.Plo
 	-rm -f internals/$(DEPDIR)/proto.Plo
 	-rm -f internals/rss25519/$(DEPDIR)/proto.Plo
 	-rm -f internals/rss25519/$(DEPDIR)/static.Plo

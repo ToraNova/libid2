@@ -53,7 +53,7 @@ namespace tsc25519 {
 	const size_t SKEY_SZ =  PKEY_NEPC*RS_EPSZ+PKEY_NSCC*RS_SCSZ+
 				SKEY_NEPC*RS_EPSZ+SKEY_NSCC*RS_SCSZ;
 	// signature
-	const size_t SGNT_NEPC = 3;
+	const size_t SGNT_NEPC = 2;
 	const size_t SGNT_NSCC = 2;
 	const size_t SGNT_SZ = SGNT_NEPC*RS_EPSZ+SGNT_NSCC*RS_SCSZ;
 
