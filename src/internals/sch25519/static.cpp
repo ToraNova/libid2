@@ -77,18 +77,15 @@ namespace sch25519{
 		unsigned char neg[RS_SCSZ];
 
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
-		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 
-		//sample a and B
+		//sample secret a
 		crypto_core_ristretto255_scalar_random( tmp->a );
-		crypto_core_ristretto255_random( tmp->pub->B );
 
 		crypto_core_ristretto255_scalar_negate(neg , tmp->a);
-		rc = crypto_scalarmult_ristretto255(
+		rc = crypto_scalarmult_ristretto255_base(
 				tmp->pub->P1,
-				neg,
-				tmp->pub->B
+				neg
 				); // P1 = aB
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
@@ -116,22 +113,17 @@ namespace sch25519{
 		//allocate for components
 		tmp->s = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
-		tmp->B = (unsigned char *)malloc( RS_EPSZ );
 
 		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
 		crypto_core_ristretto255_scalar_random(nonce);
 
-		rc = crypto_scalarmult_ristretto255(
+		rc = crypto_scalarmult_ristretto255_base(
 				tmp->U,
-				nonce,
-				key->pub->B
+				nonce
 				); // U = rB
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
 		}
-
-		//store B on the signature
-		memcpy( tmp->B, key->pub->B, RS_EPSZ );
 
 		tmp->x = hashexec(mbuffer, mlen, tmp->U, key->pub->P1);
 
@@ -158,10 +150,9 @@ namespace sch25519{
 		unsigned char tmp2[RS_EPSZ]; //tmp array
 
 		// U' = sB - xP1
-		rc = crypto_scalarmult_ristretto255(
+		rc = crypto_scalarmult_ristretto255_base(
 				tmp1,
-				sig->s,
-				par->B
+				sig->s
 				);
 		if( rc != 0 ) return rc; //abort if fail
 		rc = crypto_scalarmult_ristretto255(
@@ -227,7 +218,6 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 
 		//a, B, P1, P2
 		rs = copyskip( *sbuffer, ri->a, 	0, 	RS_SCSZ);
-		rs = copyskip( *sbuffer, ri->pub->B, 	rs, 	RS_EPSZ);
 		rs = copyskip( *sbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
 
 		return rs;
@@ -241,8 +231,7 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		*pbuffer = (unsigned char *)malloc( *(plen) );
 
 		//B, P1, P2
-		rs = copyskip( *pbuffer, ri->pub->B, 	0, 	RS_EPSZ);
-		rs = copyskip( *pbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->P1, 	0, 	RS_EPSZ);
 
 		return rs;
 	}
@@ -258,7 +247,6 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		rs = copyskip( *obuffer, ri->s, 	0, 	RS_SCSZ);
 		rs = copyskip( *obuffer, ri->x, 	rs, 	RS_SCSZ);
 		rs = copyskip( *obuffer, ri->U, 	rs, 	RS_EPSZ);
-		rs = copyskip( *obuffer, ri->B, 	rs, 	RS_EPSZ);
 
 		return rs;
 	}
@@ -272,11 +260,9 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 
 		//allocate memory for the elements and scalars
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
-		tmp->pub->B = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->a,		sbuffer, 0, 	RS_SCSZ);
-		rs = skipcopy( tmp->pub->B,	sbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->pub->P1,	sbuffer, rs, 	RS_EPSZ);
 
 		*out = (void *) tmp; return;
@@ -289,11 +275,9 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		tmp = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements
-		tmp->B = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P1 = (unsigned char *)malloc( RS_EPSZ );
 
-		rs = skipcopy( tmp->B,		pbuffer, 0, 	RS_EPSZ);
-		rs = skipcopy( tmp->P1,		pbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->P1,		pbuffer, 0, 	RS_EPSZ);
 
 		*out = (void *) tmp; return;
 	}
@@ -307,12 +291,10 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		tmp->s = (unsigned char *)malloc( RS_SCSZ );
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
-		tmp->B = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->s,		obuffer, 0, 	RS_SCSZ);
 		rs = skipcopy( tmp->x,		obuffer, rs, 	RS_SCSZ);
 		rs = skipcopy( tmp->U,		obuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( tmp->B,		obuffer, rs, 	RS_EPSZ);
 
 		*out = (void *) tmp; return;
 	}
@@ -334,7 +316,6 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		//key recast
 		struct pubkey *ri = (struct pubkey *)in;
 		//free up memory
-		free(ri->B);
 		free(ri->P1);
 		free(ri); return;
 	}
@@ -350,7 +331,6 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		free(ri->s);
 		free(ri->x);
 		free(ri->U);
-		free(ri->B);
 		free(ri); return;
 	}
 
@@ -358,14 +338,12 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 	void secprint(void *in){
 		struct seckey *ri = (struct seckey *)in;
 		printf("a :"); ucbprint(ri->a, RS_SCSZ); printf("\n");
-		printf("B :"); ucbprint(ri->pub->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->pub->P1, RS_EPSZ); printf("\n");
 		return;
 	}
 
 	void pubprint(void *in){
 		struct pubkey *ri = (struct pubkey *)in;
-		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->P1, RS_EPSZ); printf("\n");
 		return;
 	}
@@ -375,7 +353,6 @@ printf("U':"); ucbprint(tmp1, RS_EPSZ); printf("\n");
 		printf("s :"); ucbprint(ri->s, RS_SCSZ); printf("\n");
 		printf("x :"); ucbprint(ri->x, RS_SCSZ); printf("\n");
 		printf("U :"); ucbprint(ri->U, RS_EPSZ); printf("\n");
-		printf("B :"); ucbprint(ri->B, RS_EPSZ); printf("\n");
 		return;
 	}
 

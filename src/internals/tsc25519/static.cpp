@@ -76,7 +76,6 @@ namespace tsc25519{
 		unsigned char neg[RS_SCSZ];
 
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
-		tmp->pub->B1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
@@ -84,13 +83,11 @@ namespace tsc25519{
 		//sample a and B
 		crypto_core_ristretto255_scalar_random( tmp->a );
 		crypto_core_ristretto255_scalar_negate(neg , tmp->a);
-		crypto_core_ristretto255_random( tmp->pub->B1 );
 		crypto_core_ristretto255_random( tmp->pub->B2 );
 
-		rc = crypto_scalarmult_ristretto255(
+		rc = crypto_scalarmult_ristretto255_base(
 				tmp->pub->P1,
-				neg,
-				tmp->pub->B1
+				neg
 				); // P1 = aB
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
@@ -124,15 +121,13 @@ namespace tsc25519{
 		//tmp->x = (unsigned char *)malloc( RS_SCSZ ); //hashexec takes care
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->V = (unsigned char *)malloc( RS_EPSZ );
-		tmp->B1 = (unsigned char *)malloc( RS_EPSZ );
 
 		//sample r (MUST RANDOMIZE, else secret key a will be exposed)
 		crypto_core_ristretto255_scalar_random(nonce);
 
-		rc = crypto_scalarmult_ristretto255(
+		rc = crypto_scalarmult_ristretto255_base(
 				tmp->U,
-				nonce,
-				key->pub->B1
+				nonce
 				); // U = rB
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
@@ -146,9 +141,6 @@ namespace tsc25519{
 		if( rc != 0 ){ //abort if fail
 			*out = NULL; return;
 		}
-
-		//store B on the signature
-		memcpy( tmp->B1, key->pub->B1, RS_EPSZ );
 
 		tmp->x = hashexec(mbuffer, mlen,
 				tmp->U, tmp->V,
@@ -178,10 +170,9 @@ namespace tsc25519{
 		unsigned char tmp3[RS_EPSZ]; //tmp array
 
 		// U' = sB - xP1
-		rc = crypto_scalarmult_ristretto255(
+		rc = crypto_scalarmult_ristretto255_base(
 				tmp1,
-				sig->s,
-				par->B1
+				sig->s
 				);
 		if( rc != 0 ) return rc; //abort if fail
 		rc = crypto_scalarmult_ristretto255(
@@ -270,7 +261,6 @@ namespace tsc25519{
 
 		//a, B, P1, P2
 		rs = copyskip( *sbuffer, ri->a, 	0, 	RS_SCSZ);
-		rs = copyskip( *sbuffer, ri->pub->B1, 	rs, 	RS_EPSZ);
 		rs = copyskip( *sbuffer, ri->pub->B2, 	rs, 	RS_EPSZ);
 		rs = copyskip( *sbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
 		rs = copyskip( *sbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
@@ -286,8 +276,7 @@ namespace tsc25519{
 		*pbuffer = (unsigned char *)malloc( *(plen) );
 
 		//B, P1, P2
-		rs = copyskip( *pbuffer, ri->pub->B1, 	0, 	RS_EPSZ);
-		rs = copyskip( *pbuffer, ri->pub->B2, 	rs, 	RS_EPSZ);
+		rs = copyskip( *pbuffer, ri->pub->B2, 	0, 	RS_EPSZ);
 		rs = copyskip( *pbuffer, ri->pub->P1, 	rs, 	RS_EPSZ);
 		rs = copyskip( *pbuffer, ri->pub->P2, 	rs, 	RS_EPSZ);
 
@@ -306,7 +295,6 @@ namespace tsc25519{
 		rs = copyskip( *obuffer, ri->x, 	rs, 	RS_SCSZ);
 		rs = copyskip( *obuffer, ri->U, 	rs, 	RS_EPSZ);
 		rs = copyskip( *obuffer, ri->V, 	rs, 	RS_EPSZ);
-		rs = copyskip( *obuffer, ri->B1, 	rs, 	RS_EPSZ);
 
 		return rs;
 	}
@@ -320,13 +308,11 @@ namespace tsc25519{
 
 		//allocate memory for the elements and scalars
 		tmp->a = (unsigned char *)malloc( RS_SCSZ );
-		tmp->pub->B1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->pub->P2 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->a,		sbuffer, 0, 	RS_SCSZ);
-		rs = skipcopy( tmp->pub->B1,	sbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->pub->B2,	sbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->pub->P1,	sbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->pub->P2,	sbuffer, rs, 	RS_EPSZ);
@@ -341,13 +327,11 @@ namespace tsc25519{
 		tmp = (struct pubkey *)malloc( sizeof(struct pubkey) );
 
 		//allocate memory for the elements
-		tmp->B1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->B2 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P1 = (unsigned char *)malloc( RS_EPSZ );
 		tmp->P2 = (unsigned char *)malloc( RS_EPSZ );
 
-		rs = skipcopy( tmp->B1,		pbuffer, 0, 	RS_EPSZ);
-		rs = skipcopy( tmp->B2,		pbuffer, rs, 	RS_EPSZ);
+		rs = skipcopy( tmp->B2,		pbuffer, 0, 	RS_EPSZ);
 		rs = skipcopy( tmp->P1,		pbuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->P2,		pbuffer, rs, 	RS_EPSZ);
 
@@ -364,13 +348,11 @@ namespace tsc25519{
 		tmp->x = (unsigned char *)malloc( RS_SCSZ );
 		tmp->U = (unsigned char *)malloc( RS_EPSZ );
 		tmp->V = (unsigned char *)malloc( RS_EPSZ );
-		tmp->B1 = (unsigned char *)malloc( RS_EPSZ );
 
 		rs = skipcopy( tmp->s,		obuffer, 0, 	RS_SCSZ);
 		rs = skipcopy( tmp->x,		obuffer, rs, 	RS_SCSZ);
 		rs = skipcopy( tmp->U,		obuffer, rs, 	RS_EPSZ);
 		rs = skipcopy( tmp->V,		obuffer, rs, 	RS_EPSZ);
-		rs = skipcopy( tmp->B1,		obuffer, rs, 	RS_EPSZ);
 
 		*out = (void *) tmp; return;
 	}
@@ -392,7 +374,6 @@ namespace tsc25519{
 		//key recast
 		struct pubkey *ri = (struct pubkey *)in;
 		//free up memory
-		free(ri->B1);
 		free(ri->B2);
 		free(ri->P1);
 		free(ri->P2);
@@ -412,7 +393,6 @@ namespace tsc25519{
 		free(ri->x);
 		free(ri->U);
 		free(ri->V);
-		free(ri->B1);
 		free(ri); return;
 	}
 
@@ -420,7 +400,6 @@ namespace tsc25519{
 	void secprint(void *in){
 		struct seckey *ri = (struct seckey *)in;
 		printf("a :"); ucbprint(ri->a, RS_SCSZ); printf("\n");
-		printf("B1:"); ucbprint(ri->pub->B1, RS_EPSZ); printf("\n");
 		printf("B2:"); ucbprint(ri->pub->B2, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->pub->P1, RS_EPSZ); printf("\n");
 		printf("P2:"); ucbprint(ri->pub->P2, RS_EPSZ); printf("\n");
@@ -429,7 +408,6 @@ namespace tsc25519{
 
 	void pubprint(void *in){
 		struct pubkey *ri = (struct pubkey *)in;
-		printf("B1:"); ucbprint(ri->B1, RS_EPSZ); printf("\n");
 		printf("B2:"); ucbprint(ri->B2, RS_EPSZ); printf("\n");
 		printf("P1:"); ucbprint(ri->P1, RS_EPSZ); printf("\n");
 		printf("P2:"); ucbprint(ri->P2, RS_EPSZ); printf("\n");
@@ -442,7 +420,6 @@ namespace tsc25519{
 		printf("x :"); ucbprint(ri->x, RS_SCSZ); printf("\n");
 		printf("U :"); ucbprint(ri->U, RS_EPSZ); printf("\n");
 		printf("V :"); ucbprint(ri->V, RS_EPSZ); printf("\n");
-		printf("B1:"); ucbprint(ri->B1, RS_EPSZ); printf("\n");
 		return;
 	}
 

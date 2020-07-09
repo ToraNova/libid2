@@ -78,7 +78,7 @@ namespace sch25519{
 		//CMT <- U', T
 		// T = tB
 		memcpy( buf, usk->U, RS_EPSZ);
-		rc = crypto_scalarmult_ristretto255( buf+RS_EPSZ, t, usk->B);
+		rc = crypto_scalarmult_ristretto255_base( buf+RS_EPSZ, t);
 		if( rc != 0 ){
 			//abort if fail
 			lerror("Failed to compute COMMIT\n");
@@ -180,14 +180,11 @@ namespace sch25519{
 		rc = crypto_scalarmult_ristretto255( tmp1, xp, par->P1); // xP1
 		//zero and free
 		hashfree(xp);
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255( LHS, y, par->B); // yB
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_sub( tmp2, buf, tmp1); // U' - xP1
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_scalarmult_ristretto255( tmp1, c, tmp2); // c( U' - xP1 )
-		if( rc != 0 ) return rc; //abort if fail
-		rc = crypto_core_ristretto255_add( RHS, tmp1, buf+RS_EPSZ);// T + c(U' - xP1)
+		rc = 0;
+		rc += crypto_scalarmult_ristretto255_base( LHS, y); // yB
+		rc += crypto_core_ristretto255_sub( tmp2, buf, tmp1); // U' - xP1
+		rc += crypto_scalarmult_ristretto255( tmp1, c, tmp2); // c( U' - xP1 )
+		rc += crypto_core_ristretto255_add( RHS, tmp1, buf+RS_EPSZ);// T + c(U' - xP1)
 		if( rc != 0 ) return rc; //abort if fail
 
 		//check if tmp is equal to x from obuffer
@@ -216,7 +213,33 @@ namespace sch25519{
 		struct pubkey *par = (struct pubkey *)vpar;
 		struct signat *usk = (struct signat *)vusk;
 		int rc;
+		unsigned char t[RS_SCSZ], c[RS_SCSZ], y[RS_SCSZ], *xp;
+		unsigned char LHS[RS_EPSZ], RHS[RS_EPSZ], tmp[RS_EPSZ];
 
+		//sample t (commit secret)
+		crypto_core_ristretto255_scalar_random(t);
+		//sample c (challenge)
+		crypto_core_ristretto255_scalar_random(c);
+
+		//compute response
+		crypto_core_ristretto255_scalar_mul( y , c, usk->s ); //
+		crypto_core_ristretto255_scalar_add( y, y, t ); // y = t + cs
+
+		xp = hashexec(mbuffer, mlen, usk->U, par->P1);
+
+		rc = 0;
+		rc += crypto_scalarmult_ristretto255_base( LHS, y); // yB
+		rc += crypto_scalarmult_ristretto255( RHS, xp, par->P1); // xP1
+		hashfree(xp); //zero and free
+		rc += crypto_core_ristretto255_sub( RHS, usk->U, RHS); // U' - xP1
+		rc += crypto_scalarmult_ristretto255( RHS, c, RHS); // c( U' - xP1 )
+
+		rc += crypto_scalarmult_ristretto255_base( tmp, t);
+		rc += crypto_core_ristretto255_add( RHS, tmp, RHS);
+		if( rc != 0 ) return rc; //abort if fail
+
+		//check LHS == RHS
+		rc = crypto_verify_32( LHS, RHS );
 		return rc;
 	}
 
