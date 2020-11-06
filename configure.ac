@@ -62,15 +62,15 @@ AM_CONDITIONAL([COMPILETESTS], [test x$tests = xtrue])
 
 # Specify the crypto lib, i.e. --enable-cryptlib=sodium
 # default to libsodium
-AC_ARG_ENABLE([ecurve],
-[  --enable-ecurve 	'Specify which ec operations to use (ristretto255, ed25519)'],
-[ecurve=$enableval],
-[ecurve='ristretto255'])
-AS_IF(
-[test x$ecurve = x'ristretto255'],[AC_DEFINE([URT25519],[1],['Using ristretto255'])]
-)
-AS_IF(
-[test x$ecurve = x'ed25519'],[AC_DEFINE([UED25519],[1],['Using ed25519'])]
-)
+#AC_ARG_ENABLE([ecurve],
+#[  --enable-ecurve 	'Specify which ec operations to use (ristretto255, ed25519)'],
+#[ecurve=$enableval],
+#[ecurve='ristretto255'])
+#AS_IF(
+#[test x$ecurve = x'ristretto255'],[AC_DEFINE([URT25519],[1],['Using ristretto255'])]
+#)
+#AS_IF(
+#[test x$ecurve = x'ed25519'],[AC_DEFINE([UED25519],[1],['Using ed25519'])]
+#)
 
 AC_OUTPUT
